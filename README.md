@@ -40,50 +40,50 @@ After running the commands, you will have a text file containing the encrypted p
 
 Here’s a list of all the command line switches and example configurations.
 ```
-Path
+-Path
 ```
 The root path that contains the files and or folders that the script should operate on.
 ```
-Days
+-Days
 ```
 The number of days from the current date that files created during should be untouched.
 ```
-Backup
+-Backup
 ```
 The location that the files and folders should be backed up to.
 If you do not set this, a back up will not be performed.
 ```
-WorkDir
+-WorkDir
 ```
 The path of the working directory used for ZIP file creation. This should be local for best performance.
 If you do not set this, the files will not be zipped.
 ``` 
-L
+-L
 ```
 The path to output the log file to.
 The file name will be Log-Manager-Log.log.
 ```
-SendTo
+-SendTo
 ```
 The e-mail address the log should be sent to.
 ```
-From
+-From
 ```
 The from address the log should be sent from.
 ```
-Smtp
+-Smtp
 ```
 The DNS name or IP address of the SMTP server.
 ```
-User
+-User
 ```
 The user account to connect to the SMTP server.
 ```
-Pwd
+-Pwd
 ```
 The password for the user account.
 ```
-UseSsl
+-UseSsl
 ```
 Connect to the SMTP server using SSL.
 
