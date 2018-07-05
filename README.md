@@ -87,6 +87,8 @@ The password for the user account.
 ```
 Connect to the SMTP server using SSL.
 
+### Example
+
 ```
 Log-Manager.ps1 -Path C:\inetpub\logs\LogFiles\W3SVC*\* -Days 30 -Backup \\nas\archive -WorkDir E:\scripts -L E:\scripts\log -SendTo me@contoso.com -From Log-Manager@contoso.com -Smtp exch01.contoso.com -User me@contoso.com -Pwd P@ssw0rd -UseSsl
 ```
