@@ -1,4 +1,5 @@
 # Log Manager
+
 PowerShell based log file cleanup/archiver
 
 Log Manager can also be downloaded from:
@@ -9,7 +10,7 @@ Log Manager can also be downloaded from:
 
 -Mike
 
-Tweet me if you have questions: [@Digressive](https://twitter.com/digressive)
+Tweet me if you have questions: [@mikegalvin_](https://twitter.com/mikegalvin_)
 
 ## Features and Requirements
 

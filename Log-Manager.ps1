@@ -4,7 +4,7 @@
 
 .GUID 109eb5a2-1dd4-4def-9b9e-1d7413c8697f
 
-.AUTHOR Mike Galvin twitter.com/digressive
+.AUTHOR Mike Galvin twitter.com/mikegalvin_
 
 .COMPANYNAME
 
@@ -146,7 +146,7 @@ If ($FileNo.count -ne 0)
     If ($LogPath)
     {
         Add-Content -Path $Log -Value "$(Get-Date -Format G) The following objects are older than: $Time days and will be processed:"
-        Get-ChildItem $Source | Select Name,LastWriteTime | Out-File -Append $Log -Encoding ASCII
+        Get-ChildItem $Source | Select-Object Name,LastWriteTime | Out-File -Append $Log -Encoding ASCII
         Add-Content -Path $Log -Value " "
     }
 
@@ -175,7 +175,7 @@ If ($FileNo.count -ne 0)
         If ($LogPath)
         {
             Add-Content -Path $Log -Value "$(Get-Date -Format G) Contents of the backup location: $Dest"
-            Get-ChildItem $Dest | Select Name,LastWriteTime | Out-File -Append $Log -Encoding ASCII
+            Get-ChildItem $Dest | Select-Object Name,LastWriteTime | Out-File -Append $Log -Encoding ASCII
         }
     }
 
