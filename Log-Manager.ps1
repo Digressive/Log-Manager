@@ -65,7 +65,7 @@
     
     .PARAMETER L
     The path to output the log file to.
-    The file name will be Log-Manager-Log.log.
+    The file name will be Log-Manager.log.
 
     .PARAMETER SendTo
     The e-mail address the log should be sent to.
@@ -86,9 +86,9 @@
     Connect to the SMTP server using SSL.
 
     .EXAMPLE
-    Log-Manager.ps1 -Path C:\inetpub\logs\LogFiles\W3SVC*\* -Days 30 -Backup \\nas\archive -WorkDir E:\scripts -L E:\scripts\log -SendTo me@contoso.com -From Log-Manager@contoso.com -Smtp exch01.contoso.com -User me@contoso.com -Pwd P@ssw0rd -UseSsl
-    With these settings, the script will archive IIS logs files older than 30 days as a ZIP file in \\nas\archive, using the E:\scripts
-    folder as a working directory. The log file of the scritp will be output to E:\scripts\log and emailed using an SSL connection.
+    Log-Manager.ps1 -Path C:\inetpub\logs\LogFiles\W3SVC*\* -Days 30 -Backup \\nas\archive -WorkDir C:\scripts -L C:\scripts\logs -SendTo me@contoso.com -From Log-Manager@contoso.com -Smtp exch01.contoso.com -User me@contoso.com -Pwd P@ssw0rd -UseSsl
+    With these settings, the script will archive IIS logs files older than 30 days as a ZIP file in \\nas\archive, using the C:\scripts
+    folder as a working directory. The log file of the scritp will be output to C:\scripts\log and emailed using an SSL connection.
 #>
 
 ## Set up command line switches and what variables they map to
@@ -127,7 +127,7 @@ If ($FileNo.count -ne 0)
     ## If logging is configured, start log
     If ($LogPath)
     {
-        $LogFile = "Log-Manager-Log.log"
+        $LogFile = "Log-Manager.log"
         $Log = "$LogPath\$LogFile"
 
         ## If the log file already exists, clear it

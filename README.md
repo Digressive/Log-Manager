@@ -62,7 +62,7 @@ If you do not set this, the files will not be zipped.
 -L
 ```
 The path to output the log file to.
-The file name will be Log-Manager-Log.log.
+The file name will be Log-Manager.log.
 ```
 -SendTo
 ```
@@ -91,6 +91,6 @@ Connect to the SMTP server using SSL.
 ### Example
 
 ```
-Log-Manager.ps1 -Path C:\inetpub\logs\LogFiles\W3SVC*\* -Days 30 -Backup \\nas\archive -WorkDir E:\scripts -L E:\scripts\log -SendTo me@contoso.com -From Log-Manager@contoso.com -Smtp exch01.contoso.com -User me@contoso.com -Pwd P@ssw0rd -UseSsl
+Log-Manager.ps1 -Path C:\inetpub\logs\LogFiles\W3SVC*\* -Days 30 -Backup \\nas\archive -WorkDir C:\scripts -L C:\scripts\logs -SendTo me@contoso.com -From Log-Manager@contoso.com -Smtp exch01.contoso.com -User me@contoso.com -Pwd P@ssw0rd -UseSsl
 ```
-With these settings, the script will archive IIS logs files older than 30 days as a ZIP file in \\nas\archive, using the E:\scripts folder as a working directory. The log file of the scritp will be output to E:\scripts\log and emailed using an SSL connection.
+With these settings, the script will archive IIS logs files older than 30 days as a ZIP file in \\nas\archive, using the C:\scripts folder as a working directory. The log file of the scritp will be output to C:\scripts\logs and emailed using an SSL connection.
