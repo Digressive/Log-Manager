@@ -30,7 +30,7 @@ The password used for SMTP server authentication must be in an encrypted text fi
 
 Please note: This is only required if you need to authenticate to the SMTP server when send the log via e-mail.
 
-```
+``` powershell
 $creds = Get-Credential
 $creds.Password | ConvertFrom-SecureString | Set-Content c:\scripts\ps-script-pwd.txt
 ```
@@ -40,57 +40,80 @@ After running the commands, you will have a text file containing the encrypted p
 ### Configuration
 
 Here’s a list of all the command line switches and example configurations.
-```
+
+``` txt
 -Path
 ```
+
 The root path that contains the files and or folders that the script should operate on.
-```
+
+``` txt
 -Days
 ```
+
 The number of days from the current date that files created during should be untouched.
-```
+
+``` txt
 -Backup
 ```
+
 The location that the files and folders should be backed up to.
 If you do not set this, a back up will not be performed.
-```
+
+``` txt
 -WorkDir
 ```
+
 The path of the working directory used for ZIP file creation. This should be local for best performance.
 If you do not set this, the files will not be zipped.
-``` 
+
+``` txt
 -L
 ```
+
 The path to output the log file to.
 The file name will be Log-Manager.log.
-```
+
+``` txt
 -SendTo
 ```
+
 The e-mail address the log should be sent to.
-```
+
+``` txt
 -From
 ```
+
 The from address the log should be sent from.
-```
+
+``` txt
 -Smtp
 ```
+
 The DNS name or IP address of the SMTP server.
-```
+
+``` txt
 -User
 ```
+
 The user account to connect to the SMTP server.
-```
+
+``` txt
 -Pwd
 ```
+
 The password for the user account.
-```
+
+``` txt
 -UseSsl
 ```
+
 Connect to the SMTP server using SSL.
 
 ### Example
 
-```
+``` txt
 Log-Manager.ps1 -Path C:\inetpub\logs\LogFiles\W3SVC*\* -Days 30 -Backup \\nas\archive -WorkDir C:\scripts -L C:\scripts\logs -SendTo me@contoso.com -From Log-Manager@contoso.com -Smtp exch01.contoso.com -User me@contoso.com -Pwd P@ssw0rd -UseSsl
 ```
+
 With these settings, the script will archive IIS logs files older than 30 days as a ZIP file in \\nas\archive, using the C:\scripts folder as a working directory. The log file of the scritp will be output to C:\scripts\logs and emailed using an SSL connection.
