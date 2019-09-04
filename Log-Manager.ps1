@@ -1,12 +1,12 @@
 ﻿<#PSScriptInfo
 
-.VERSION 1.7
+.VERSION 1.8
 
 .GUID 109eb5a2-1dd4-4def-9b9e-1d7413c8697f
 
 .AUTHOR Mike Galvin Contact: mike@gal.vin twitter.com/mikegalvin_
 
-.COMPANYNAME
+.COMPANYNAME Mike Galvin
 
 .COPYRIGHT (C) Mike Galvin. All rights reserved.
 
@@ -67,6 +67,9 @@
     The path to output the log file to.
     The file name will be Log-Manager.log.
 
+    .PARAMETER Subject
+    The email subject that the email should have. Encapulate with single or double quotes.
+
     .PARAMETER SendTo
     The e-mail address the log should be sent to.
 
@@ -86,9 +89,9 @@
     Connect to the SMTP server using SSL.
 
     .EXAMPLE
-    Log-Manager.ps1 -Path C:\inetpub\logs\LogFiles\W3SVC*\* -Days 30 -Backup \\nas\archive -WorkDir C:\scripts -L C:\scripts\logs -SendTo me@contoso.com -From Log-Manager@contoso.com -Smtp exch01.contoso.com -User me@contoso.com -Pwd P@ssw0rd -UseSsl
+    Log-Manager.ps1 -Path C:\inetpub\logs\LogFiles\W3SVC*\* -Days 30 -Backup \\nas\archive -WorkDir C:\scripts -L C:\scripts\logs -Subject 'Server: Log Cleanup' -SendTo me@contoso.com -From Log-Manager@contoso.com -Smtp exch01.contoso.com -User me@contoso.com -Pwd P@ssw0rd -UseSsl
     With these settings, the script will archive IIS logs files older than 30 days as a ZIP file in \\nas\archive, using the C:\scripts
-    folder as a working directory. The log file of the scritp will be output to C:\scripts\log and emailed using an SSL connection.
+    folder as a working directory. The log file of the script will be output to C:\scripts\log and emailed with a custom subject line, using an SSL connection.
 #>
 
 ## Set up command line switches and what variables they map to
@@ -106,6 +109,8 @@ Param(
     $Zip,
     [alias("L")]
     $LogPath,
+    [alias("Subject")]
+    $MailSubject,
     [alias("SendTo")]
     $MailTo,
     [alias("From")]
@@ -192,7 +197,12 @@ If ($FileNo.count -ne 0)
         ## If email was configured, set the variables for the email subject and body
         If ($SmtpServer)
         {
-            $MailSubject = "Log Manager Log"
+            # If no subject is set, use the string below
+            If ($Null -eq $MailSubject)
+            {
+                $MailSubject = "Log Manager"
+            }
+
             $MailBody = Get-Content -Path $Log | Out-String
 
             ## If an email password was configured, create a variable with the username and password

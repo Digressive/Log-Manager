@@ -75,6 +75,12 @@ The path to output the log file to.
 The file name will be Log-Manager.log.
 
 ``` txt
+-Subject
+```
+
+The email subject that the email should have. Encapulate with single or double quotes.
+
+``` txt
 -SendTo
 ```
 
@@ -113,7 +119,7 @@ Connect to the SMTP server using SSL.
 ### Example
 
 ``` txt
-Log-Manager.ps1 -Path C:\inetpub\logs\LogFiles\W3SVC*\* -Days 30 -Backup \\nas\archive -WorkDir C:\scripts -L C:\scripts\logs -SendTo me@contoso.com -From Log-Manager@contoso.com -Smtp exch01.contoso.com -User me@contoso.com -Pwd P@ssw0rd -UseSsl
+Log-Manager.ps1 -Path C:\inetpub\logs\LogFiles\W3SVC*\* -Days 30 -Backup \\nas\archive -WorkDir C:\scripts -L C:\scripts\logs -Subject 'Server: Logs Cleanup' -SendTo me@contoso.com -From Log-Manager@contoso.com -Smtp exch01.contoso.com -User me@contoso.com -Pwd P@ssw0rd -UseSsl
 ```
 
-With these settings, the script will archive IIS logs files older than 30 days as a ZIP file in \\nas\archive, using the C:\scripts folder as a working directory. The log file of the scritp will be output to C:\scripts\logs and emailed using an SSL connection.
+With these settings, the script will archive IIS logs files older than 30 days as a ZIP file in \\nas\archive, using the C:\scripts folder as a working directory. The log file of the scritp will be output to C:\scripts\logs and e-mailed with a custom subject line, using an SSL connection.
