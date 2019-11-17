@@ -2,11 +2,16 @@
 
 PowerShell based log file cleanup/archiver
 
+Please consider donating to support my work:
+
+* You can support me on a monthly basis [using Patreon.](https://www.patreon.com/mikegalvin)
+* You can support me with a one-time payment [using PayPal](https://www.paypal.me/digressive) or by [using Kofi.](https://ko-fi.com/mikegalvin)
+
 Log Manager can also be downloaded from:
 
+* For full instructions and documentation, [visit my blog post](https://gal.vin/2017/06/13/powershell-log-manager)
 * [The Microsoft TechNet Gallery](https://gallery.technet.microsoft.com/scriptcenter/Log-Manager-PowerShell-c558219c?redir=0)
 * [The PowerShell Gallery](https://www.powershellgallery.com/packages/Log-Manager)
-* For full instructions and documentation, [visit my blog post](https://gal.vin/2017/06/13/powershell-log-manager)
 
 -Mike
 
