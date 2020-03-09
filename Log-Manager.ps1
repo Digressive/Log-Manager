@@ -1,16 +1,16 @@
 ﻿<#PSScriptInfo
 
-.VERSION 1.8
+.VERSION 20.03.06
 
 .GUID 109eb5a2-1dd4-4def-9b9e-1d7413c8697f
 
-.AUTHOR Mike Galvin Contact: mike@gal.vin twitter.com/mikegalvin_
+.AUTHOR Mike Galvin Contact: mike@gal.vin / twitter.com/mikegalvin_
 
 .COMPANYNAME Mike Galvin
 
 .COPYRIGHT (C) Mike Galvin. All rights reserved.
 
-.TAGS Log Manager Cleanup MDT Microsoft Deployment Toolkit IIS Internet Information Services
+.TAGS Log Manager Clean up Backup Zip History MDT Microsoft Deployment Toolkit IIS Internet Information Services
 
 .LICENSEURI
 
@@ -30,84 +30,115 @@
 
 <#
     .SYNOPSIS
-    The script can cleanup and optionally archive old logs files.
-    
+    Log Manager Utility - Flexible clean up and backup of log files.
+
     .DESCRIPTION
-    The script can cleanup and optionally archive old logs files.
+    This utility will delete files and folders older than X days.
+    It can also backup files and folders older than X days to another location.
 
-    This script can:
-    
-    Delete files and folder trees older than X days.
-    Move files and folder trees to another location, after X days.
-    Archive files and folder tress as a ZIP file, after X days.
-
-    Please note: to send a log file using ssl and an SMTP password you must generate an encrypted
-    password file. The password file is unique to both the user and machine.
-    
-    The command is as follows:
+    To send a log file via e-mail using ssl and an SMTP password you must generate an encrypted password file.
+    The password file is unique to both the user and machine.
+    To create the password file run this command as the user and on the machine that will use the file:
 
     $creds = Get-Credential
     $creds.Password | ConvertFrom-SecureString | Set-Content c:\foo\ps-script-pwd.txt
-   
-    .PARAMETER Path
-    The root path that contains the files and or folders that the script should operate on.
 
-    .PARAMETER Days
-    The number of days from the current date that files created during should be untouched.
+    .PARAMETER LogPath
+    The path that contains the logs that the utility should process.
 
-    .PARAMETER Backup
-    The location that the files and folders should be backed up to.
-    If you do not set this, a back up will not be performed.
+    .PARAMETER LogKeep
+    Instructs the utility to keep a specified number of days’ worth of logs.
+    Logs older than the number of days specified will be deleted.
 
-    .PARAMETER WorkDir
-    The path of the working directory used for ZIP file creation. This should be local for best performance.
-    If you do not set this, the files will not be zipped.
-    
+    .PARAMETER BackupTo
+    The path the logs should be backed up to.
+    A folder will be created inside this location.
+    Do not add a trailing backslash.
+    If this option is not used, backup will not be performed.
+
+    .PARAMETER BacKeep
+    Instructs the utility to keep a specified number of days’ worth of backups.
+    Backups older than the number of days specified will be deleted.
+    Only backup folders or zip files created by this utility will be removed.
+
+    .PARAMETER Compress
+    This option will create a zip file of the log files.
+
+    .PARAMETER Wd
+    The path to the working directory to use for the backup before copying it to the final backup directory.
+    Use a directory on local fast media to improve performance.
+
+    .PARAMETER ZipName
+    Enter the name of the zip file you wish to have.
+    If the name includes a space, encapsulate with single quotes.
+    The time and date will be appended to this name.
+    If this option is not used, a default name of logs-HOSTNAME-date-time.zip will be used.
+
+    .PARAMETER Sz
+    Configure the utility to use 7-Zip to compress the log files.
+    7-Zip must be installed in the default location ($env:ProgramFiles) if it is not found, Windows compression will be used as a fallback.
+
     .PARAMETER L
     The path to output the log file to.
-    The file name will be Log-Manager.log.
+    The file name will be Log-Man_YYYY-MM-dd_HH-mm-ss.log
+    Do not add a trailing \ backslash.
+
+    .PARAMETER NoBanner
+    Use this option to hide the ASCII art title in the console.
 
     .PARAMETER Subject
-    The email subject that the email should have. Encapulate with single or double quotes.
+    The subject line for the e-mail log. Encapsulate with single or double quotes.
+    If no subject is specified, the default of "Log Manager Utility Log" will be used.
 
     .PARAMETER SendTo
     The e-mail address the log should be sent to.
 
     .PARAMETER From
-    The from address the log should be sent from.
+    The e-mail address the log should be sent from.
 
     .PARAMETER Smtp
     The DNS name or IP address of the SMTP server.
 
     .PARAMETER User
-    The user account to connect to the SMTP server.
+    The user account to authenticate to the SMTP server.
 
     .PARAMETER Pwd
-    The password for the user account.
+    The txt file containing the encrypted password for SMTP authentication.
 
     .PARAMETER UseSsl
-    Connect to the SMTP server using SSL.
+    Configures the utility to connect to the SMTP server using SSL.
 
     .EXAMPLE
-    Log-Manager.ps1 -Path C:\inetpub\logs\LogFiles\W3SVC*\* -Days 30 -Backup \\nas\archive -WorkDir C:\scripts -L C:\scripts\logs -Subject 'Server: Log Cleanup' -SendTo me@contoso.com -From Log-Manager@contoso.com -Smtp exch01.contoso.com -User me@contoso.com -Pwd P@ssw0rd -UseSsl
-    With these settings, the script will archive IIS logs files older than 30 days as a ZIP file in \\nas\archive, using the C:\scripts
-    folder as a working directory. The log file of the script will be output to C:\scripts\log and emailed with a custom subject line, using an SSL connection.
+    Log-Manager.ps1 -LogPath C:\inetpub\logs\LogFiles\W3SVC*\* -LogKeep 30 -BackupTo \\nas\archive -BacKeep 30
+    -Wd C:\temp -Compress -L C:\scripts\logs -Subject 'Server: Log Manager' -SendTo me@contoso.com
+    -From Log-Manager@contoso.com -Smtp smtp.outlook.com -User me@contoso.com -Pwd C:\foo\pwd.txt -UseSsl
+
+    The above command will backup and remove IIS logs older than 30 days. It will create a zip folder using the
+    C:\temp folder as a working directory and the file will be stored in \\nas\archive.
+    The log file will be output to C:\scripts\logs and sent via e-mail with a custom subject line.
 #>
 
-## Set up command line switches and what variables they map to
+## Set up command line switches.
 [CmdletBinding()]
 Param(
     [parameter(Mandatory=$True)]
-    [alias("Path")]
+    [alias("LogPath")]
+    [ValidateScript({Test-Path $_ -PathType 'Container'})]
     $Source,
-    [parameter(Mandatory=$True)]
-    [alias("Days")]
-    $Time,
-    [alias("Backup")]
-    $Dest,
-    [alias("WorkDir")]
-    $Zip,
+    [alias("LogKeep")]
+    $LogHistory,
+    [alias("BackupTo")]
+    [ValidateScript({Test-Path $_ -PathType 'Container'})]
+    $Backup,
+    [alias("BacKeep")]
+    $BacHistory,
+    [alias("Wd")]
+    [ValidateScript({Test-Path $_ -PathType 'Container'})]
+    $WorkDir,
+    [alias("ZipName")]
+    $ZName,
     [alias("L")]
+    [ValidateScript({Test-Path $_ -PathType 'Container'})]
     $LogPath,
     [alias("Subject")]
     $MailSubject,
@@ -120,115 +151,481 @@ Param(
     [alias("User")]
     $SmtpUser,
     [alias("Pwd")]
+    [ValidateScript({Test-Path -Path $_ -PathType Leaf})]
     $SmtpPwd,
-    [switch]$UseSsl)
+    [switch]$UseSsl,
+    [switch]$Compress,
+    [switch]$Sz,
+    [switch]$NoBanner)
+
+If ($NoBanner -eq $False)
+{
+    Write-Host -Object ""
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "   __    _____  ___    __  __    __    _  _    __    ___  ____  ____   "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "  (  )  (  _  )/ __)  (  \/  )  /__\  ( \( )  /__\  / __)( ___)(  _ \  "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "   )(__  )(_)(( (_-.   )    (  /(__)\  )  (  /(__)\( (_-. )__)  )   /  "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "  (____)(_____)\___/  (_/\/\_)(__)(__)(_)\_)(__)(__)\___/(____)(_)\_)  "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "   __  __  ____  ____  __    ____  ____  _  _                          "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "  (  )(  )(_  _)(_  _)(  )  (_  _)(_  _)( \/ )                         "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "   )(__)(   )(   _)(_  )(__  _)(_   )(   \  /                          "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "  (______) (__) (____)(____)(____) (__)  (__)                          "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "        Mike Galvin    https://gal.vin    Version 20.03.06 ><_>        "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
+    Write-Host -Object ""
+}
+
+## If logging is configured, start logging.
+## If the log file already exists, clear it.
+If ($LogPath)
+{
+    $LogFile = ("Log-Man_{0:yyyy-MM-dd_HH-mm-ss}.log" -f (Get-Date))
+    $Log = "$LogPath\$LogFile"
+
+    $LogT = Test-Path -Path $Log
+
+    If ($LogT)
+    {
+        Clear-Content -Path $Log
+    }
+
+    Add-Content -Path $Log -Encoding ASCII -Value "$(Get-Date -Format "yyyy-MM-dd HH:mm:ss") [INFO] Log started"
+}
+
+##
+## Start of functions.
+##
+
+## Function to get date in specific format.
+Function Get-DateFormat
+{
+    Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+}
+
+## Function for logging.
+Function Write-Log($Type, $Event)
+{
+    If ($Type -eq "Info")
+    {
+        If ($Null -ne $LogPath)
+        {
+            Add-Content -Path $Log -Encoding ASCII -Value "$(Get-DateFormat) [INFO] $Event"
+        }
+        
+        Write-Host -Object "$(Get-DateFormat) [INFO] $Event"
+    }
+
+    If ($Type -eq "Succ")
+    {
+        If ($Null -ne $LogPath)
+        {
+            Add-Content -Path $Log -Encoding ASCII -Value "$(Get-DateFormat) [SUCCESS] $Event"
+        }
+
+        Write-Host -ForegroundColor Green -Object "$(Get-DateFormat) [SUCCESS] $Event"
+    }
+
+    If ($Type -eq "Err")
+    {
+        If ($Null -ne $LogPath)
+        {
+            Add-Content -Path $Log -Encoding ASCII -Value "$(Get-DateFormat) [ERROR] $Event"
+        }
+
+        Write-Host -ForegroundColor Red -BackgroundColor Black -Object "$(Get-DateFormat) [ERROR] $Event"
+    }
+
+    If ($Type -eq "Conf")
+    {
+        If ($Null -ne $LogPath)
+        {
+            Add-Content -Path $Log -Encoding ASCII -Value "$Event"
+        }
+
+        Write-Host -ForegroundColor Cyan -Object "$Event"
+    }
+}
+
+## Function for the options post backup.
+Function OptionsRun
+{
+    ## If the -keep switch AND the -compress switch are NOT configured.
+    If ($Null -eq $BacHistory -And $Compress -eq $False)
+    {
+        ## Remove all previous backup folders, including ones from previous versions of this script.
+        Get-ChildItem -Path $WorkDir -Filter "$ZName-*-*-***-*-*" -Directory | Remove-Item -Recurse -Force
+
+        ## If a working directory is configured by the user, remove all previous backup folders, including
+        ## ones from previous versions of this script.
+        If ($WorkDir -ne $Backup)
+        {
+            Get-ChildItem -Path $Backup -Filter "$ZName-*-*-***-*-*" -Directory | Remove-Item -Recurse -Force
+        }
+
+        Write-Log -Type Info -Event "Removing previous backup folders"
+    }
+
+    ## If the -keep option IS configured AND the -compress option is NOT configured.
+    else {
+        If ($Compress -eq $False)
+        {
+            ## Remove previous backup folders older than the configured number of days, including
+            ## ones from previous versions of this script.
+            Get-ChildItem -Path $WorkDir -Filter "$ZName-*-*-***-*-*" -Directory | Where-Object CreationTime –lt (Get-Date).AddDays(-$BacHistory) | Remove-Item -Recurse -Force
+
+            ## If a working directory is configured by the user, remove previous backup folders
+            ## older than the configured number of days remove all previous backup folders,
+            ## including ones from previous versions of this script.
+            If ($WorkDir -ne $Backup)
+            {
+                Get-ChildItem -Path $Backup -Filter "$ZName-*-*-***-*-*" -Directory | Where-Object CreationTime –lt (Get-Date).AddDays(-$BacHistory) | Remove-Item -Recurse -Force
+            }
+
+            Write-Log -Type Info -Event "Removing backup folders older than: $BacHistory days"
+        }
+    }
+
+    ## Check to see if the -compress switch IS configured AND if the -keep switch is NOT configured.
+    If ($Compress)
+    {
+        If ($Null -eq $BacHistory)
+        {
+            ## Remove all previous compressed backups, including ones from previous versions of this script.
+            Remove-Item "$WorkDir\$ZName-*-*-***-*-*.zip" -Force
+
+            ## If a working directory is configured by the user, remove all previous compressed backups,
+            ## including ones from previous versions of this script.
+            If ($WorkDir -ne $Backup)
+            {
+                Remove-Item "$Backup\$ZName-*-*-***-*-*.zip" -Force
+            }
+
+            Write-Log -Type Info -Event "Removing previous compressed backups"
+        }
+
+        ## If the -compress switch IS configured AND if the -keep switch IS configured.
+        else {
+            
+            ## Remove previous compressed backups older than the configured number of days, including
+            ## ones from previous versions of this script.
+            Get-ChildItem -Path "$WorkDir\$ZName-*-*-***-*-*.zip" | Where-Object CreationTime –lt (Get-Date).AddDays(-$BacHistory) | Remove-Item -Force
+
+            ## If a working directory is configured by the user, remove previous compressed backups older
+            ## than the configured number of days, including ones from previous versions of this script.
+            If ($WorkDir -ne $Backup)
+            {
+                Get-ChildItem -Path "$Backup\$ZName-*-*-***-*-*.zip" | Where-Object CreationTime –lt (Get-Date).AddDays(-$BacHistory) | Remove-Item -Force
+            }
+
+            Write-Log -Type Info -Event "Removing compressed backups older than: $BacHistory days"
+        }
+
+        ## If the -compress switch and the -Sz switch IS configured, test for 7zip being installed.
+        ## If it is, compress the backup folder, if it is not use Windows compression.
+        If ($Sz -eq $True)
+        {
+            $7zT = Test-Path "$env:programfiles\7-Zip\7z.exe"
+            If ($7zT -eq $True)
+            {
+                Write-Log -Type Info -Event "Compressing using 7-Zip compression"
+                & "$env:programfiles\7-Zip\7z.exe" -bso0 a -tzip ("$WorkDir\$ZName-{0:yyyy-MM-dd_HH-mm-ss}.zip" -f (Get-Date)) "$WorkDir\$ZName\*"
+            }
+
+            else {
+                Write-Log -Type Info -Event "Compressing using Windows compression"
+                Add-Type -AssemblyName "system.io.compression.filesystem"
+                [io.compression.zipfile]::CreateFromDirectory("$WorkDir\$ZName", ("$WorkDir\$ZName-{0:yyyy-MM-dd_HH-mm-ss}.zip" -f (Get-Date)))
+            }
+        }
+
+        ## If the -compress switch IS configured and the -Sz switch is NOT configured, compress
+        ## the backup folder using Windows compression.
+        else {
+            Write-Log -Type Info -Event "Compressing using Windows compression"
+            Add-Type -AssemblyName "system.io.compression.filesystem"
+            [io.compression.zipfile]::CreateFromDirectory("$WorkDir\$ZName", ("$WorkDir\$ZName-{0:yyyy-MM-dd_HH-mm-ss}.zip" -f (Get-Date)))
+        }
+
+        ## Test if the compressed file was created.
+        $ZipT = Test-Path "$WorkDir\$ZName-*-*-***-*-*.zip"
+        If ($ZipT -eq $True)
+        {
+            Write-Log -Type Succ -Event "Successfully created compressed backup in $WorkDir"
+        }
+
+        else {
+            Write-Log -Type Err -Event "There was a problem creating a compressed backup in $WorkDir"
+        }
+        ## End of testing for file creation.
+
+        ## Remove the VMs export folder.
+        Get-ChildItem -Path $WorkDir -Filter "$ZName" -Directory | Remove-Item -Recurse -Force
+
+        ## If a working directory has been configured by the user, move the compressed
+        ## backup to the backup location and rename to include the date.
+        If ($WorkDir -ne $Backup)
+        {
+            Get-ChildItem -Path $WorkDir -Filter "$ZName-*-*-*-*-*.zip" | Move-Item -Destination $Backup
+
+            ## Test if the move suceeded.
+            $ZMoveT = Test-Path "$Backup\$ZName-*-*-*-*-*.zip"
+            If ($ZMoveT -eq $True)
+            {
+                Write-Log -Type Succ -Event "Successfully moved compressed backup to $Backup"
+            }
+
+            else {
+                Write-Log -Type Err -Event "There was a problem moving compressed backup to $Backup"
+            }
+            ## End of testing for move.
+        }
+    }
+
+    ## If the -compress switch is NOT configured AND if the -keep switch is NOT configured, rename
+    ## the backup folder to include the date.
+    else {
+        Get-ChildItem -Path $WorkDir -Filter $ZName -Directory | Rename-Item -NewName ("$WorkDir\$ZName-{0:yyyy-MM-dd_HH-mm-ss}" -f (Get-Date))
+
+        If ($WorkDir -ne $Backup)
+        {
+            Get-ChildItem -Path $WorkDir -Filter "$ZName-*-*-***-*-*" -Directory | Move-Item -Destination ("$Backup\$ZName-{0:yyyy-MM-dd_HH-mm-ss}" -f (Get-Date))
+
+            ## Test if the move suceeded.
+            $MoveT = Test-Path "$Backup\$ZName-*-*-***-*-*"
+            If ($MoveT -eq $True)
+            {
+                Write-Log -Type Succ -Event "Successfully moved backup folder to $Backup"
+            }
+
+            else {
+                Write-Log -Type Err -Event "There was a problem moving backup folder to $Backup"
+            }
+
+            ## End of testing.
+        }
+    }
+}
+
+##
+## End of functions.
+##
+
+##
+## Start main process.
+##
 
 ## Count the number of files that are old enough to work on in the configured directory
-$FileNo = Get-ChildItem $Source –Recurse | Where-Object CreationTime –lt (Get-Date).AddDays(-$Time) | Measure-Object
+## If the number of the files to work on is not zero then proceed.
+$FileNo = Get-ChildItem -Path $Source –Recurse | Where-Object CreationTime –lt (Get-Date).AddDays(-$LogHistory) | Measure-Object
 
-## If the number of the files to work on is zero, do nothing
 If ($FileNo.count -ne 0)
 {
-    ## If logging is configured, start log
-    If ($LogPath)
+    ## If time -days switch isn't configured, then set it to 0
+    If ($Null -eq $LogHistory)
     {
-        $LogFile = "Log-Manager.log"
-        $Log = "$LogPath\$LogFile"
-
-        ## If the log file already exists, clear it
-        $LogT = Test-Path -Path $Log
-
-        If ($LogT)
-        {
-            Clear-Content -Path $Log
-        }
-
-        Add-Content -Path $Log -Value "****************************************"
-        Add-Content -Path $Log -Value "$(Get-Date -Format G) Log started"
-        Add-Content -Path $Log -Value " "
+        $LogHistory = "0"
     }
 
-    If ($LogPath)
+    If ($Null -eq $BacHistory)
     {
-        Add-Content -Path $Log -Value "$(Get-Date -Format G) The following objects are older than: $Time days and will be processed:"
-        Get-ChildItem $Source | Select-Object Name,LastWriteTime | Out-File -Append $Log -Encoding ASCII
-        Add-Content -Path $Log -Value " "
+        $BacHistory = "0"
     }
 
-    ## If the zip option was configured, copy the working files to a temp dir and create a zip file, then remove the temp dir and move the zip file
-    If ($Zip)
+    ## If the user has not configured the working directory, set it as the backup directory if needed.
+    If ($Null -ne $Backup)
     {
-        Add-Type -AssemblyName "system.io.compression.filesystem"
-        New-Item -Path $Zip\temp -ItemType Directory
-        Get-ChildItem $Source | Where-Object CreationTime –lt (Get-Date).AddDays(-$Time) | Copy-Item -Destination $Zip\temp -Recurse -Force
-        [io.compression.zipfile]::CreateFromDirectory("$Zip\temp", "$Zip\Logs-{0:yyyy-MM-dd-HH-mm}.zip" -f (Get-Date))
-        Remove-Item $Zip\temp -Recurse
-        Move-Item $Zip\Logs-*.zip $Dest
-        Get-ChildItem $Source –Recurse | Where-Object CreationTime –lt (Get-Date).AddDays(-$Time) | Remove-Item -Recurse
-
-        If ($LogPath)
+        If ($Null -eq $WorkDir)
         {
-            Add-Content -Path $Log -Value "$(Get-Date -Format G) Zip file created and copied to: $Dest"
+            $WorkDir = "$Backup"
         }
     }
 
-    ## If the backup directory was configured, copy the files to the backup dir
-    If ($Dest)
+    ## If the user has not configured a zip name, set it as the default.
+    If ($Null -eq $ZName)
     {
-        Get-ChildItem $Source | Where-Object CreationTime –lt (Get-Date).AddDays(-$Time) | Copy-Item -Destination $Dest -Recurse -Force
-
-        If ($LogPath)
-        {
-            Add-Content -Path $Log -Value "$(Get-Date -Format G) Contents of the backup location: $Dest"
-            Get-ChildItem $Dest | Select-Object Name,LastWriteTime | Out-File -Append $Log -Encoding ASCII
-        }
+        $ZName = "Logs-$env:computername"
     }
 
-    ## If no backup options were configured, or after doing the previous operations, remove the old files
-    Get-ChildItem $Source –Recurse | Where-Object CreationTime –lt (Get-Date).AddDays(-$Time) | Remove-Item -Recurse
+    ##
+    ## Display the current config and log if configured.
+    ##
+    Write-Log -Type Conf -Event "************ Running with the following config *************."
+    Write-Log -Type Conf -Event "Script running on:.....$env:computername."
+    Write-Log -Type Conf -Event "Path to process:.......$Source."
+    Write-Log -Type Conf -Event "Logs to keep:..........$LogHistory days"
 
-    ## If log was configured stop the log
+    If ($Backup)
+    {
+        Write-Log -Type Conf -Event "Backup directory:......$Backup."
+        Write-Log -Type Conf -Event "Working directory:.....$WorkDir."
+        Write-Log -Type Conf -Event "Backups to keep:.......$BacHistory days"
+        Write-Log -Type Conf -Event "Zip file name:.........$ZName + date and time."
+    }
+
+    else {
+        Write-Log -Type Conf -Event "Backup directory:......No Config"
+        Write-Log -Type Conf -Event "Working directory:.....No Config"
+        Write-Log -Type Conf -Event "Backups to keep:.......No Config"
+        Write-Log -Type Conf -Event "Zip file name:.........No Config"
+    }
+
     If ($LogPath)
     {
-        Add-Content -Path $Log -Value " "
-        Add-Content -Path $Log -Value "$(Get-Date -Format G) Log finished"
-        Add-Content -Path $Log -Value "****************************************"
+        Write-Log -Type Conf -Event "Log directory:.........$LogPath."
+    }
 
-        ## If email was configured, set the variables for the email subject and body
-        If ($SmtpServer)
+    else {
+        Write-Log -Type Conf -Event "Log directory:.........No Config"
+    }
+
+    If ($MailTo)
+    {
+        Write-Log -Type Conf -Event "E-mail log to:.........$MailTo."
+    }
+
+    else {
+        Write-Log -Type Conf -Event "E-mail log to:.........No Config"
+    }
+
+    If ($MailFrom)
+    {
+        Write-Log -Type Conf -Event "E-mail log from:.......$MailFrom."
+    }
+
+    else {
+        Write-Log -Type Conf -Event "E-mail log from:.......No Config"
+    }
+
+    If ($MailSubject)
+    {
+        Write-Log -Type Conf -Event "E-mail subject:........$MailSubject."
+    }
+
+    else {
+        Write-Log -Type Conf -Event "E-mail subject:........Default"
+    }
+
+    If ($SmtpServer)
+    {
+        Write-Log -Type Conf -Event "SMTP server:...........$SmtpServer."
+    }
+
+    else {
+        Write-Log -Type Conf -Event "SMTP server:...........No Config"
+    }
+
+    If ($SmtpUser)
+    {
+        Write-Log -Type Conf -Event "SMTP user:.............$SmtpUser."
+    }
+
+    else {
+        Write-Log -Type Conf -Event "SMTP user:.............No Config"
+    }
+
+    If ($SmtpPwd)
+    {
+        Write-Log -Type Conf -Event "SMTP pwd file:.........$SmtpPwd."
+    }
+
+    else {
+        Write-Log -Type Conf -Event "SMTP pwd file:.........No Config"
+    }
+
+    Write-Log -Type Conf -Event "-UseSSL switch:........$UseSsl."
+    Write-Log -Type Conf -Event "-Compress switch:......$Compress."
+    Write-Log -Type Conf -Event "-Sz switch:............$Sz."
+    Write-Log -Type Conf -Event "************************************************************"
+    Write-Log -Type Info -Event "Process started"
+    ##
+    ## Display current config ends here.
+    ##
+
+    Write-Log -Type Info -Event "The following objects will be processed:"
+    Get-ChildItem -Path $Source | Select-Object -ExpandProperty Name
+    Get-ChildItem -Path $Source | Select-Object -ExpandProperty Name | Out-File -Append $Log -Encoding ASCII
+
+    If ($Backup)
+    {
+        ## Test for the existence of a previous backup. If it exists, delete it.
+        $BackupT = Test-Path "$WorkDir\$ZName"
+        If ($BackupT -eq $True)
         {
-            # If no subject is set, use the string below
-            If ($Null -eq $MailSubject)
+            Remove-Item "$WorkDir\$ZName" -Recurse -Force
+        }
+
+        New-Item -Path "$WorkDir\$ZName" -ItemType Directory | Out-Null
+        Get-ChildItem -Path $Source | Where-Object CreationTime –lt (Get-Date).AddDays(-$LogHistory) | Copy-Item -Destination "$WorkDir\$ZName" -Recurse -Force
+
+        $DirMoveT = Test-Path -Path "$WorkDir\$ZName\*"
+
+        If ($DirMoveT -eq $True)
+        {
+            Write-Log -Type Succ -Event "Successfully moved objects older than: $LogHistory days"
+        }
+
+        else {
+            Write-Log -Type Err -Event "There was an error moving objects older than: $LogHistory days"
+        }
+
+        OptionsRun
+    }
+
+    ## If no backup options were configured, or after doing the previous operations, remove the old files.
+    Get-ChildItem -Path $Source | Where-Object CreationTime –lt (Get-Date).AddDays(-$LogHistory) | Remove-Item -Recurse
+    Write-Log -Type Info -Event "Deleting logs older than: $LogHistory days"
+
+    ##
+    ## Main process ends here.
+    ##
+}
+
+## If there are no objects old enough to process then finish.
+else {
+    Write-Log -Type Info -Event "There are no objects to process."
+}
+
+Write-Log -Type Info -Event "Process finished."
+
+## If logging is configured then finish the log file.
+If ($LogPath)
+{
+    Add-Content -Path $Log -Encoding ASCII -Value "$(Get-Date -Format "yyyy-MM-dd HH:mm:ss") [INFO] Log finished"
+
+    ## This whole block is for e-mail, if it is configured.
+    If ($SmtpServer)
+    {
+        ## Default e-mail subject if none is configured.
+        If ($Null -eq $MailSubject)
+        {
+            $MailSubject = "Log Manager Utility Log"
+        }
+
+        ## Setting the contents of the log to be the e-mail body. 
+        $MailBody = Get-Content -Path $Log | Out-String
+
+        ## If an smtp password is configured, get the username and password together for authentication.
+        ## If an smtp password is not provided then send the e-mail without authentication and obviously no SSL.
+        If ($SmtpPwd)
+        {
+            $SmtpPwdEncrypt = Get-Content $SmtpPwd | ConvertTo-SecureString
+            $SmtpCreds = New-Object System.Management.Automation.PSCredential -ArgumentList ($SmtpUser, $SmtpPwdEncrypt)
+
+            ## If -ssl switch is used, send the email with SSL.
+            ## If it isn't then don't use SSL, but still authenticate with the credentials.
+            If ($UseSsl)
             {
-                $MailSubject = "Log Manager"
+                Send-MailMessage -To $MailTo -From $MailFrom -Subject $MailSubject -Body $MailBody -SmtpServer $SmtpServer -UseSsl -Credential $SmtpCreds
             }
 
-            $MailBody = Get-Content -Path $Log | Out-String
-
-            ## If an email password was configured, create a variable with the username and password
-            If ($SmtpPwd)
-            {
-                $SmtpPwdEncrypt = Get-Content $SmtpPwd | ConvertTo-SecureString
-                $SmtpCreds = New-Object System.Management.Automation.PSCredential -ArgumentList ($SmtpUser, $SmtpPwdEncrypt)
-
-                ## If ssl was configured, send the email with ssl
-                If ($UseSsl)
-                {
-                    Send-MailMessage -To $MailTo -From $MailFrom -Subject $MailSubject -Body $MailBody -SmtpServer $SmtpServer -UseSsl -Credential $SmtpCreds
-                }
-
-                ## If ssl wasn't configured, send the email without ssl
-                Else
-                {
-                    Send-MailMessage -To $MailTo -From $MailFrom -Subject $MailSubject -Body $MailBody -SmtpServer $SmtpServer -Credential $SmtpCreds
-                }
+            else {
+                Send-MailMessage -To $MailTo -From $MailFrom -Subject $MailSubject -Body $MailBody -SmtpServer $SmtpServer -Credential $SmtpCreds
             }
+        }
 
-            ## If an email username and password were not configured, send the email without authentication
-            Else
-            {
-                Send-MailMessage -To $MailTo -From $MailFrom -Subject $MailSubject -Body $MailBody -SmtpServer $SmtpServer
-            }
+        else {
+            Send-MailMessage -To $MailTo -From $MailFrom -Subject $MailSubject -Body $MailBody -SmtpServer $SmtpServer
         }
     }
 }

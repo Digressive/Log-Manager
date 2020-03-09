@@ -1,18 +1,30 @@
-# Log Manager
+# Log Manager Utility
 
-PowerShell based log file cleanup/archiver
+Flexible clean up and backup of log files.
 
-For full instructions and documentation, [visit my blog post](https://gal.vin/2017/06/13/powershell-log-manager)
+``` txt
+ __    _____  ___    __  __    __    _  _    __    ___  ____  ____
+(  )  (  _  )/ __)  (  \/  )  /__\  ( \( )  /__\  / __)( ___)(  _ \
+ )(__  )(_)(( (_-.   )    (  /(__)\  )  (  /(__)\( (_-. )__)  )   /
+(____)(_____)\___/  (_/\/\_)(__)(__)(_)\_)(__)(__)\___/(____)(_)\_)
+ __  __  ____  ____  __    ____  ____  _  _
+(  )(  )(_  _)(_  _)(  )  (_  _)(_  _)( \/ )
+ )(__)(   )(   _)(_  )(__  _)(_   )(   \  /
+(______) (__) (____)(____)(____) (__)  (__)
 
-Please consider donating to support my work:
+      Mike Galvin    https://gal.vin    Version 20.03.06 🐟
+```
 
-* You can support me on a monthly basis [using Patreon.](https://www.patreon.com/mikegalvin)
-* You can support me with a one-time payment [using PayPal](https://www.paypal.me/digressive) or by [using Kofi.](https://ko-fi.com/mikegalvin)
+For full instructions and documentation, [visit my site.](https://gal.vin/2017/06/13/powershell-log-manager)
 
-Log Manager can also be downloaded from:
+Please consider supporting my work:
 
-* [The Microsoft TechNet Gallery](https://gallery.technet.microsoft.com/scriptcenter/Log-Manager-PowerShell-c558219c?redir=0)
-* [The PowerShell Gallery](https://www.powershellgallery.com/packages/Log-Manager)
+* Sign up [using Patreon.](https://www.patreon.com/mikegalvin)
+* Support with a one-time payment [using PayPal.](https://www.paypal.me/digressive)
+
+Log Manager Utility can also be downloaded from:
+
+* [The Microsoft PowerShell Gallery](https://www.powershellgallery.com/packages/Log-Manager)
 
 Tweet me if you have questions: [@mikegalvin_](https://twitter.com/mikegalvin_)
 
@@ -20,19 +32,16 @@ Tweet me if you have questions: [@mikegalvin_](https://twitter.com/mikegalvin_)
 
 ## Features and Requirements
 
-This utility can be configured to do the following:
+* The utility will delete files and folders older than X days.
+* Can also backup files and folders older than X days to another location.
+* Backup files and folders as a zip file.
+* The utility requires at least PowerShell 5.0
 
-* Delete files and folder trees older than X days.
-* Move files and folder trees to another location.
-* Archive files and folder trees as a ZIP file.
-
-### A Quick Self-Aware Note
-
-I’m totally aware that my script is designed to manage log files and yet it will also generate a log file, if required. I prefer to get a notification when a server runs a script, so that’s why all of my scripts have this option. Some of my scripts generate a log file that gets overwritten each time they run, so they shouldn’t build up over time, but for everything else this script should help.
+This utility has been tested on Windows 10, Windows Server 2019, Windows Server 2016 and Windows Server 2012 R2 (Datacenter and Core Installations) with PowerShell 5.0.
 
 ### Generating A Password File
 
-The password used for SMTP server authentication must be in an encrypted text file. To generate the password file, run the following command in PowerShell, on the computer that is going to run the script and logged in with the user that will be running the script. When you run the command you will be prompted for a username and password. Enter the username and password you want to use to authenticate to your SMTP server.
+The password used for SMTP server authentication must be in an encrypted text file. To generate the password file, run the following command in PowerShell on the computer and logged in with the user that will be running the utility. When you run the command, you will be prompted for a username and password. Enter the username and password you want to use to authenticate to your SMTP server.
 
 Please note: This is only required if you need to authenticate to the SMTP server when send the log via e-mail.
 
@@ -47,85 +56,30 @@ After running the commands, you will have a text file containing the encrypted p
 
 Here’s a list of all the command line switches and example configurations.
 
-``` txt
--Path
-```
-
-The root path that contains the files and or folders that the script should operate on.
-
-``` txt
--Days
-```
-
-The number of days from the current date that files created during should be untouched.
-
-``` txt
--Backup
-```
-
-The location that the files and folders should be backed up to.
-If you do not set this, a back up will not be performed.
-
-``` txt
--WorkDir
-```
-
-The path of the working directory used for ZIP file creation. This should be local for best performance.
-If you do not set this, the files will not be zipped.
-
-``` txt
--L
-```
-
-The path to output the log file to.
-The file name will be Log-Manager.log.
-
-``` txt
--Subject
-```
-
-The email subject that the email should have. Encapulate with single or double quotes.
-
-``` txt
--SendTo
-```
-
-The e-mail address the log should be sent to.
-
-``` txt
--From
-```
-
-The from address the log should be sent from.
-
-``` txt
--Smtp
-```
-
-The DNS name or IP address of the SMTP server.
-
-``` txt
--User
-```
-
-The user account to connect to the SMTP server.
-
-``` txt
--Pwd
-```
-
-The password for the user account.
-
-``` txt
--UseSsl
-```
-
-Connect to the SMTP server using SSL.
+| Command Line Switch | Description | Example |
+| ------------------- | ----------- | ------- |
+| -LogPath | The path that contains the logs that the utility should process. | C:\inetpub\logs\LogFiles\W3SVC*\* |
+| -LogKeep | Instructs the utility to keep a specified number of days’ worth of logs. Logs older than the number of days specified will be deleted. | 30 |
+| -BackupTo | The path the logs should be backed up to. A folder will be created inside this location. Do not add a trailing backslash. If this option is not used, backup will not be performed. | \\\nas\archive |
+| -BacKeep | Instructs the utility to keep a specified number of days’ worth of backups. Backups older than the number of days specified will be deleted. Only backup folders or zip files created by this utility will be removed. | 30 |
+| -Wd | The path to the working directory to use for the backup before copying it to the final backup directory. Use a directory on local fast media to improve performance. | C:\temp |
+| -Compress | This option will create a zip file of the log files. | N/A |
+| -Sz | Configure the utility to use 7-Zip to compress the log files. 7-Zip must be installed in the default location ($env:ProgramFiles) if it is not found, Windows compression will be used as a fallback. | N/A |
+| -ZipName | Enter the name of the zip file you wish to have. If the name includes a space, encapsulate with single quotes. The time and date will be appended to this name. If this option is not used, a default name of logs-HOSTNAME-date-time.zip will be used. | 'IIS Logs' |
+| -NoBanner | Use this option to hide the ASCII art title in the console. | N/A |
+| -L | The path to output the log file to. The file name will be Log-Man_YYYY-MM-dd_HH-mm-ss.log. Do not add a trailing \ backslash. | C:\scripts\logs |
+| -Subject | The subject line for the e-mail log. Encapsulate with single or double quotes. If no subject is specified, the default of "Log Manager Utility Log" will be used. | 'Server: Notification' |
+| -SendTo | The e-mail address the log should be sent to. | me@contoso.com |
+| -From | The e-mail address the log should be sent from. | Log-Manager@contoso.com |
+| -Smtp | The DNS name or IP address of the SMTP server. | smtp.live.com OR smtp.office365.com |
+| -User | The user account to authenticate to the SMTP server. | example@contoso.com |
+| -Pwd | The txt file containing the encrypted password for SMTP authentication. | C:\scripts\ps-script-pwd.txt |
+| -UseSsl | Configures the utility to connect to the SMTP server using SSL. | N/A |
 
 ### Example
 
 ``` txt
-Log-Manager.ps1 -Path C:\inetpub\logs\LogFiles\W3SVC*\* -Days 30 -Backup \\nas\archive -WorkDir C:\scripts -L C:\scripts\logs -Subject 'Server: Logs Cleanup' -SendTo me@contoso.com -From Log-Manager@contoso.com -Smtp exch01.contoso.com -User me@contoso.com -Pwd P@ssw0rd -UseSsl
+Log-Manager.ps1 -LogPath C:\inetpub\logs\LogFiles\W3SVC*\* -LogKeep 30 -BackupTo \\nas\archive -BacKeep 30 -Wd C:\temp -Compress -L C:\scripts\logs -Subject 'Server: Log Manager' -SendTo me@contoso.com -From Log-Manager@contoso.com -Smtp smtp.outlook.com -User me@contoso.com -Pwd C:\foo\pwd.txt -UseSsl
 ```
 
-With these settings, the script will archive IIS logs files older than 30 days as a ZIP file in \\nas\archive, using the C:\scripts folder as a working directory. The log file of the scritp will be output to C:\scripts\logs and e-mailed with a custom subject line, using an SSL connection.
+The above command will backup and remove IIS logs older than 30 days. It will create a zip folder using the C:\temp folder as a working directory and the file will be stored in \\\nas\archive. The log file will be output to C:\scripts\logs and sent via e-mail with a custom subject line.
