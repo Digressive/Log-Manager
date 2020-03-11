@@ -12,7 +12,7 @@ Flexible clean up and backup of log files.
  )(__)(   )(   _)(_  )(__  _)(_   )(   \  /
 (______) (__) (____)(____)(____) (__)  (__)
 
-      Mike Galvin    https://gal.vin    Version 20.03.06 🐟
+      Mike Galvin    https://gal.vin    Version 20.03.11 🐄
 ```
 
 For full instructions and documentation, [visit my site.](https://gal.vin/2017/06/13/powershell-log-manager)
@@ -58,7 +58,7 @@ Here’s a list of all the command line switches and example configurations.
 
 | Command Line Switch | Description | Example |
 | ------------------- | ----------- | ------- |
-| -LogPath | The path that contains the logs that the utility should process. | C:\inetpub\logs\LogFiles\W3SVC*\* |
+| -LogsPath | The path that contains the logs that the utility should process. | C:\inetpub\logs\LogFiles\W3SVC*\* |
 | -LogKeep | Instructs the utility to keep a specified number of days’ worth of logs. Logs older than the number of days specified will be deleted. | 30 |
 | -BackupTo | The path the logs should be backed up to. A folder will be created inside this location. Do not add a trailing backslash. If this option is not used, backup will not be performed. | \\\nas\archive |
 | -BacKeep | Instructs the utility to keep a specified number of days’ worth of backups. Backups older than the number of days specified will be deleted. Only backup folders or zip files created by this utility will be removed. | 30 |
@@ -79,7 +79,7 @@ Here’s a list of all the command line switches and example configurations.
 ### Example
 
 ``` txt
-Log-Manager.ps1 -LogPath C:\inetpub\logs\LogFiles\W3SVC*\* -LogKeep 30 -BackupTo \\nas\archive -BacKeep 30 -Wd C:\temp -Compress -L C:\scripts\logs -Subject 'Server: Log Manager' -SendTo me@contoso.com -From Log-Manager@contoso.com -Smtp smtp.outlook.com -User me@contoso.com -Pwd C:\foo\pwd.txt -UseSsl
+Log-Manager.ps1 -LogsPath C:\inetpub\logs\LogFiles\W3SVC*\* -LogKeep 30 -BackupTo \\nas\archive -BacKeep 30 -Wd C:\temp -Compress -L C:\scripts\logs -Subject 'Server: Log Manager' -SendTo me@contoso.com -From Log-Manager@contoso.com -Smtp smtp.outlook.com -User me@contoso.com -Pwd C:\foo\pwd.txt -UseSsl
 ```
 
 The above command will backup and remove IIS logs older than 30 days. It will create a zip folder using the C:\temp folder as a working directory and the file will be stored in \\\nas\archive. The log file will be output to C:\scripts\logs and sent via e-mail with a custom subject line.

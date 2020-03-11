@@ -1,6 +1,6 @@
 ﻿<#PSScriptInfo
 
-.VERSION 20.03.06
+.VERSION 20.03.11
 
 .GUID 109eb5a2-1dd4-4def-9b9e-1d7413c8697f
 
@@ -43,7 +43,7 @@
     $creds = Get-Credential
     $creds.Password | ConvertFrom-SecureString | Set-Content c:\foo\ps-script-pwd.txt
 
-    .PARAMETER LogPath
+    .PARAMETER LogsPath
     The path that contains the logs that the utility should process.
 
     .PARAMETER LogKeep
@@ -109,7 +109,7 @@
     Configures the utility to connect to the SMTP server using SSL.
 
     .EXAMPLE
-    Log-Manager.ps1 -LogPath C:\inetpub\logs\LogFiles\W3SVC*\* -LogKeep 30 -BackupTo \\nas\archive -BacKeep 30
+    Log-Manager.ps1 -LogsPath C:\inetpub\logs\LogFiles\W3SVC*\* -LogKeep 30 -BackupTo \\nas\archive -BacKeep 30
     -Wd C:\temp -Compress -L C:\scripts\logs -Subject 'Server: Log Manager' -SendTo me@contoso.com
     -From Log-Manager@contoso.com -Smtp smtp.outlook.com -User me@contoso.com -Pwd C:\foo\pwd.txt -UseSsl
 
@@ -122,7 +122,7 @@
 [CmdletBinding()]
 Param(
     [parameter(Mandatory=$True)]
-    [alias("LogPath")]
+    [alias("LogsPath")]
     [ValidateScript({Test-Path $_ -PathType 'Container'})]
     $Source,
     [alias("LogKeep")]
