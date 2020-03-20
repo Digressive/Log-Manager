@@ -1,6 +1,6 @@
 ﻿<#PSScriptInfo
 
-.VERSION 20.03.11
+.VERSION 20.03.20
 
 .GUID 109eb5a2-1dd4-4def-9b9e-1d7413c8697f
 
@@ -78,13 +78,13 @@
     Configure the utility to use 7-Zip to compress the log files.
     7-Zip must be installed in the default location ($env:ProgramFiles) if it is not found, Windows compression will be used as a fallback.
 
+    .PARAMETER NoBanner
+    Use this option to hide the ASCII art title in the console.
+
     .PARAMETER L
     The path to output the log file to.
     The file name will be Log-Man_YYYY-MM-dd_HH-mm-ss.log
     Do not add a trailing \ backslash.
-
-    .PARAMETER NoBanner
-    Use this option to hide the ASCII art title in the console.
 
     .PARAMETER Subject
     The subject line for the e-mail log. Encapsulate with single or double quotes.
@@ -169,9 +169,10 @@ If ($NoBanner -eq $False)
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "   __  __  ____  ____  __    ____  ____  _  _                          "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "  (  )(  )(_  _)(_  _)(  )  (_  _)(_  _)( \/ )                         "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "   )(__)(   )(   _)(_  )(__  _)(_   )(   \  /                          "
-    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "  (______) (__) (____)(____)(____) (__)  (__)                          "
-    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
-    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "        Mike Galvin    https://gal.vin    Version 20.03.06 ><_>        "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "  (______) (__) (____)(____)(____) (__)  (__)             ((...))      "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                          ( o o )      "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                           \   /       "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "    Mike Galvin   https://gal.vin   Version 20.03.20        ^_^        "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
     Write-Host -Object ""
 }
