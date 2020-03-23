@@ -1,6 +1,6 @@
 ﻿<#PSScriptInfo
 
-.VERSION 20.03.20
+.VERSION 20.03.23
 
 .GUID 109eb5a2-1dd4-4def-9b9e-1d7413c8697f
 
@@ -123,7 +123,6 @@
 Param(
     [parameter(Mandatory=$True)]
     [alias("LogsPath")]
-    [ValidateScript({Test-Path $_ -PathType 'Container'})]
     $Source,
     [alias("LogKeep")]
     $LogHistory,
@@ -169,10 +168,10 @@ If ($NoBanner -eq $False)
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "   __  __  ____  ____  __    ____  ____  _  _                          "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "  (  )(  )(_  _)(_  _)(  )  (_  _)(_  _)( \/ )                         "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "   )(__)(   )(   _)(_  )(__  _)(_   )(   \  /                          "
-    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "  (______) (__) (____)(____)(____) (__)  (__)             ((...))      "
-    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                          ( o o )      "
-    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                           \   /       "
-    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "    Mike Galvin   https://gal.vin   Version 20.03.20        ^_^        "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "  (______) (__) (____)(____)(____) (__)  (__)                          "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "    Mike Galvin   https://gal.vin   Version 20.03.23                   "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
     Write-Host -Object ""
 }
