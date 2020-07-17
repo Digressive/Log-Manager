@@ -1,6 +1,6 @@
 ﻿<#PSScriptInfo
 
-.VERSION 20.03.23
+.VERSION 20.07.17
 
 .GUID 109eb5a2-1dd4-4def-9b9e-1d7413c8697f
 
@@ -171,7 +171,7 @@ If ($NoBanner -eq $False)
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "  (______) (__) (____)(____)(____) (__)  (__)                          "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
-    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "    Mike Galvin   https://gal.vin   Version 20.03.23                   "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "    Mike Galvin   https://gal.vin   Version 20.07.17                   "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
     Write-Host -Object ""
 }
@@ -204,46 +204,46 @@ Function Get-DateFormat
 }
 
 ## Function for logging.
-Function Write-Log($Type, $Event)
+Function Write-Log($Type, $Evt)
 {
     If ($Type -eq "Info")
     {
         If ($Null -ne $LogPath)
         {
-            Add-Content -Path $Log -Encoding ASCII -Value "$(Get-DateFormat) [INFO] $Event"
+            Add-Content -Path $Log -Encoding ASCII -Value "$(Get-DateFormat) [INFO] $Evt"
         }
         
-        Write-Host -Object "$(Get-DateFormat) [INFO] $Event"
+        Write-Host -Object "$(Get-DateFormat) [INFO] $Evt"
     }
 
     If ($Type -eq "Succ")
     {
         If ($Null -ne $LogPath)
         {
-            Add-Content -Path $Log -Encoding ASCII -Value "$(Get-DateFormat) [SUCCESS] $Event"
+            Add-Content -Path $Log -Encoding ASCII -Value "$(Get-DateFormat) [SUCCESS] $Evt"
         }
 
-        Write-Host -ForegroundColor Green -Object "$(Get-DateFormat) [SUCCESS] $Event"
+        Write-Host -ForegroundColor Green -Object "$(Get-DateFormat) [SUCCESS] $Evt"
     }
 
     If ($Type -eq "Err")
     {
         If ($Null -ne $LogPath)
         {
-            Add-Content -Path $Log -Encoding ASCII -Value "$(Get-DateFormat) [ERROR] $Event"
+            Add-Content -Path $Log -Encoding ASCII -Value "$(Get-DateFormat) [ERROR] $Evt"
         }
 
-        Write-Host -ForegroundColor Red -BackgroundColor Black -Object "$(Get-DateFormat) [ERROR] $Event"
+        Write-Host -ForegroundColor Red -BackgroundColor Black -Object "$(Get-DateFormat) [ERROR] $Evt"
     }
 
     If ($Type -eq "Conf")
     {
         If ($Null -ne $LogPath)
         {
-            Add-Content -Path $Log -Encoding ASCII -Value "$Event"
+            Add-Content -Path $Log -Encoding ASCII -Value "$Evt"
         }
 
-        Write-Host -ForegroundColor Cyan -Object "$Event"
+        Write-Host -ForegroundColor Cyan -Object "$Evt"
     }
 }
 
@@ -263,7 +263,7 @@ Function OptionsRun
             Get-ChildItem -Path $Backup -Filter "$ZName-*-*-***-*-*" -Directory | Remove-Item -Recurse -Force
         }
 
-        Write-Log -Type Info -Event "Removing previous backup folders"
+        Write-Log -Type Info -Evt "Removing previous backup folders"
     }
 
     ## If the -keep option IS configured AND the -compress option is NOT configured.
@@ -282,7 +282,7 @@ Function OptionsRun
                 Get-ChildItem -Path $Backup -Filter "$ZName-*-*-***-*-*" -Directory | Where-Object CreationTime –lt (Get-Date).AddDays(-$BacHistory) | Remove-Item -Recurse -Force
             }
 
-            Write-Log -Type Info -Event "Removing backup folders older than: $BacHistory days"
+            Write-Log -Type Info -Evt "Removing backup folders older than: $BacHistory days"
         }
     }
 
@@ -301,7 +301,7 @@ Function OptionsRun
                 Remove-Item "$Backup\$ZName-*-*-***-*-*.zip" -Force
             }
 
-            Write-Log -Type Info -Event "Removing previous compressed backups"
+            Write-Log -Type Info -Evt "Removing previous compressed backups"
         }
 
         ## If the -compress switch IS configured AND if the -keep switch IS configured.
@@ -318,7 +318,7 @@ Function OptionsRun
                 Get-ChildItem -Path "$Backup\$ZName-*-*-***-*-*.zip" | Where-Object CreationTime –lt (Get-Date).AddDays(-$BacHistory) | Remove-Item -Force
             }
 
-            Write-Log -Type Info -Event "Removing compressed backups older than: $BacHistory days"
+            Write-Log -Type Info -Evt "Removing compressed backups older than: $BacHistory days"
         }
 
         ## If the -compress switch and the -Sz switch IS configured, test for 7zip being installed.
@@ -328,12 +328,12 @@ Function OptionsRun
             $7zT = Test-Path "$env:programfiles\7-Zip\7z.exe"
             If ($7zT -eq $True)
             {
-                Write-Log -Type Info -Event "Compressing using 7-Zip compression"
+                Write-Log -Type Info -Evt "Compressing using 7-Zip compression"
                 & "$env:programfiles\7-Zip\7z.exe" -bso0 a -tzip ("$WorkDir\$ZName-{0:yyyy-MM-dd_HH-mm-ss}.zip" -f (Get-Date)) "$WorkDir\$ZName\*"
             }
 
             else {
-                Write-Log -Type Info -Event "Compressing using Windows compression"
+                Write-Log -Type Info -Evt "Compressing using Windows compression"
                 Add-Type -AssemblyName "system.io.compression.filesystem"
                 [io.compression.zipfile]::CreateFromDirectory("$WorkDir\$ZName", ("$WorkDir\$ZName-{0:yyyy-MM-dd_HH-mm-ss}.zip" -f (Get-Date)))
             }
@@ -342,7 +342,7 @@ Function OptionsRun
         ## If the -compress switch IS configured and the -Sz switch is NOT configured, compress
         ## the backup folder using Windows compression.
         else {
-            Write-Log -Type Info -Event "Compressing using Windows compression"
+            Write-Log -Type Info -Evt "Compressing using Windows compression"
             Add-Type -AssemblyName "system.io.compression.filesystem"
             [io.compression.zipfile]::CreateFromDirectory("$WorkDir\$ZName", ("$WorkDir\$ZName-{0:yyyy-MM-dd_HH-mm-ss}.zip" -f (Get-Date)))
         }
@@ -351,11 +351,11 @@ Function OptionsRun
         $ZipT = Test-Path "$WorkDir\$ZName-*-*-***-*-*.zip"
         If ($ZipT -eq $True)
         {
-            Write-Log -Type Succ -Event "Successfully created compressed backup in $WorkDir"
+            Write-Log -Type Succ -Evt "Successfully created compressed backup in $WorkDir"
         }
 
         else {
-            Write-Log -Type Err -Event "There was a problem creating a compressed backup in $WorkDir"
+            Write-Log -Type Err -Evt "There was a problem creating a compressed backup in $WorkDir"
         }
         ## End of testing for file creation.
 
@@ -372,11 +372,11 @@ Function OptionsRun
             $ZMoveT = Test-Path "$Backup\$ZName-*-*-*-*-*.zip"
             If ($ZMoveT -eq $True)
             {
-                Write-Log -Type Succ -Event "Successfully moved compressed backup to $Backup"
+                Write-Log -Type Succ -Evt "Successfully moved compressed backup to $Backup"
             }
 
             else {
-                Write-Log -Type Err -Event "There was a problem moving compressed backup to $Backup"
+                Write-Log -Type Err -Evt "There was a problem moving compressed backup to $Backup"
             }
             ## End of testing for move.
         }
@@ -395,11 +395,11 @@ Function OptionsRun
             $MoveT = Test-Path "$Backup\$ZName-*-*-***-*-*"
             If ($MoveT -eq $True)
             {
-                Write-Log -Type Succ -Event "Successfully moved backup folder to $Backup"
+                Write-Log -Type Succ -Evt "Successfully moved backup folder to $Backup"
             }
 
             else {
-                Write-Log -Type Err -Event "There was a problem moving backup folder to $Backup"
+                Write-Log -Type Err -Evt "There was a problem moving backup folder to $Backup"
             }
 
             ## End of testing.
@@ -450,99 +450,99 @@ If ($FileNo.count -ne 0)
     ##
     ## Display the current config and log if configured.
     ##
-    Write-Log -Type Conf -Event "************ Running with the following config *************."
-    Write-Log -Type Conf -Event "Script running on:.....$env:computername."
-    Write-Log -Type Conf -Event "Path to process:.......$Source."
-    Write-Log -Type Conf -Event "Logs to keep:..........$LogHistory days"
+    Write-Log -Type Conf -Evt "************ Running with the following config *************."
+    Write-Log -Type Conf -Evt "Script running on:.....$env:computername."
+    Write-Log -Type Conf -Evt "Path to process:.......$Source."
+    Write-Log -Type Conf -Evt "Logs to keep:..........$LogHistory days"
 
     If ($Backup)
     {
-        Write-Log -Type Conf -Event "Backup directory:......$Backup."
-        Write-Log -Type Conf -Event "Working directory:.....$WorkDir."
-        Write-Log -Type Conf -Event "Backups to keep:.......$BacHistory days"
-        Write-Log -Type Conf -Event "Zip file name:.........$ZName + date and time."
+        Write-Log -Type Conf -Evt "Backup directory:......$Backup."
+        Write-Log -Type Conf -Evt "Working directory:.....$WorkDir."
+        Write-Log -Type Conf -Evt "Backups to keep:.......$BacHistory days"
+        Write-Log -Type Conf -Evt "Zip file name:.........$ZName + date and time."
     }
 
     else {
-        Write-Log -Type Conf -Event "Backup directory:......No Config"
-        Write-Log -Type Conf -Event "Working directory:.....No Config"
-        Write-Log -Type Conf -Event "Backups to keep:.......No Config"
-        Write-Log -Type Conf -Event "Zip file name:.........No Config"
+        Write-Log -Type Conf -Evt "Backup directory:......No Config"
+        Write-Log -Type Conf -Evt "Working directory:.....No Config"
+        Write-Log -Type Conf -Evt "Backups to keep:.......No Config"
+        Write-Log -Type Conf -Evt "Zip file name:.........No Config"
     }
 
     If ($LogPath)
     {
-        Write-Log -Type Conf -Event "Log directory:.........$LogPath."
+        Write-Log -Type Conf -Evt "Log directory:.........$LogPath."
     }
 
     else {
-        Write-Log -Type Conf -Event "Log directory:.........No Config"
+        Write-Log -Type Conf -Evt "Log directory:.........No Config"
     }
 
     If ($MailTo)
     {
-        Write-Log -Type Conf -Event "E-mail log to:.........$MailTo."
+        Write-Log -Type Conf -Evt "E-mail log to:.........$MailTo."
     }
 
     else {
-        Write-Log -Type Conf -Event "E-mail log to:.........No Config"
+        Write-Log -Type Conf -Evt "E-mail log to:.........No Config"
     }
 
     If ($MailFrom)
     {
-        Write-Log -Type Conf -Event "E-mail log from:.......$MailFrom."
+        Write-Log -Type Conf -Evt "E-mail log from:.......$MailFrom."
     }
 
     else {
-        Write-Log -Type Conf -Event "E-mail log from:.......No Config"
+        Write-Log -Type Conf -Evt "E-mail log from:.......No Config"
     }
 
     If ($MailSubject)
     {
-        Write-Log -Type Conf -Event "E-mail subject:........$MailSubject."
+        Write-Log -Type Conf -Evt "E-mail subject:........$MailSubject."
     }
 
     else {
-        Write-Log -Type Conf -Event "E-mail subject:........Default"
+        Write-Log -Type Conf -Evt "E-mail subject:........Default"
     }
 
     If ($SmtpServer)
     {
-        Write-Log -Type Conf -Event "SMTP server:...........$SmtpServer."
+        Write-Log -Type Conf -Evt "SMTP server:...........$SmtpServer."
     }
 
     else {
-        Write-Log -Type Conf -Event "SMTP server:...........No Config"
+        Write-Log -Type Conf -Evt "SMTP server:...........No Config"
     }
 
     If ($SmtpUser)
     {
-        Write-Log -Type Conf -Event "SMTP user:.............$SmtpUser."
+        Write-Log -Type Conf -Evt "SMTP user:.............$SmtpUser."
     }
 
     else {
-        Write-Log -Type Conf -Event "SMTP user:.............No Config"
+        Write-Log -Type Conf -Evt "SMTP user:.............No Config"
     }
 
     If ($SmtpPwd)
     {
-        Write-Log -Type Conf -Event "SMTP pwd file:.........$SmtpPwd."
+        Write-Log -Type Conf -Evt "SMTP pwd file:.........$SmtpPwd."
     }
 
     else {
-        Write-Log -Type Conf -Event "SMTP pwd file:.........No Config"
+        Write-Log -Type Conf -Evt "SMTP pwd file:.........No Config"
     }
 
-    Write-Log -Type Conf -Event "-UseSSL switch:........$UseSsl."
-    Write-Log -Type Conf -Event "-Compress switch:......$Compress."
-    Write-Log -Type Conf -Event "-Sz switch:............$Sz."
-    Write-Log -Type Conf -Event "************************************************************"
-    Write-Log -Type Info -Event "Process started"
+    Write-Log -Type Conf -Evt "-UseSSL switch:........$UseSsl."
+    Write-Log -Type Conf -Evt "-Compress switch:......$Compress."
+    Write-Log -Type Conf -Evt "-Sz switch:............$Sz."
+    Write-Log -Type Conf -Evt "************************************************************"
+    Write-Log -Type Info -Evt "Process started"
     ##
     ## Display current config ends here.
     ##
 
-    Write-Log -Type Info -Event "The following objects will be processed:"
+    Write-Log -Type Info -Evt "The following objects will be processed:"
     Get-ChildItem -Path $Source | Select-Object -ExpandProperty Name
     Get-ChildItem -Path $Source | Select-Object -ExpandProperty Name | Out-File -Append $Log -Encoding ASCII
 
@@ -562,11 +562,11 @@ If ($FileNo.count -ne 0)
 
         If ($DirMoveT -eq $True)
         {
-            Write-Log -Type Succ -Event "Successfully moved objects older than: $LogHistory days"
+            Write-Log -Type Succ -Evt "Successfully moved objects older than: $LogHistory days"
         }
 
         else {
-            Write-Log -Type Err -Event "There was an error moving objects older than: $LogHistory days"
+            Write-Log -Type Err -Evt "There was an error moving objects older than: $LogHistory days"
         }
 
         OptionsRun
@@ -574,7 +574,7 @@ If ($FileNo.count -ne 0)
 
     ## If no backup options were configured, or after doing the previous operations, remove the old files.
     Get-ChildItem -Path $Source | Where-Object CreationTime –lt (Get-Date).AddDays(-$LogHistory) | Remove-Item -Recurse
-    Write-Log -Type Info -Event "Deleting logs older than: $LogHistory days"
+    Write-Log -Type Info -Evt "Deleting logs older than: $LogHistory days"
 
     ##
     ## Main process ends here.
@@ -583,10 +583,10 @@ If ($FileNo.count -ne 0)
 
 ## If there are no objects old enough to process then finish.
 else {
-    Write-Log -Type Info -Event "There are no objects to process."
+    Write-Log -Type Info -Evt "There are no objects to process."
 }
 
-Write-Log -Type Info -Event "Process finished."
+Write-Log -Type Info -Evt "Process finished."
 
 ## If logging is configured then finish the log file.
 If ($LogPath)
