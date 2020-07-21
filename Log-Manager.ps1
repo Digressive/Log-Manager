@@ -1,6 +1,6 @@
 ﻿<#PSScriptInfo
 
-.VERSION 20.07.17
+.VERSION 20.07.21
 
 .GUID 109eb5a2-1dd4-4def-9b9e-1d7413c8697f
 
@@ -171,7 +171,7 @@ If ($NoBanner -eq $False)
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "  (______) (__) (____)(____)(____) (__)  (__)                          "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
-    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "    Mike Galvin   https://gal.vin   Version 20.07.17                   "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "    Mike Galvin   https://gal.vin   Version 20.07.21                   "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
     Write-Host -Object ""
 }
@@ -544,7 +544,11 @@ If ($FileNo.count -ne 0)
 
     Write-Log -Type Info -Evt "The following objects will be processed:"
     Get-ChildItem -Path $Source | Select-Object -ExpandProperty Name
-    Get-ChildItem -Path $Source | Select-Object -ExpandProperty Name | Out-File -Append $Log -Encoding ASCII
+
+    If ($LogPath)
+    {
+        Get-ChildItem -Path $Source | Select-Object -ExpandProperty Name | Out-File -Append $Log -Encoding ASCII
+    }
 
     If ($Backup)
     {
