@@ -1,6 +1,6 @@
 ﻿<#PSScriptInfo
 
-.VERSION 20.07.21
+.VERSION 20.07.27
 
 .GUID 109eb5a2-1dd4-4def-9b9e-1d7413c8697f
 
@@ -171,7 +171,7 @@ If ($NoBanner -eq $False)
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "  (______) (__) (____)(____)(____) (__)  (__)                          "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
-    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "    Mike Galvin   https://gal.vin   Version 20.07.21                   "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "    Mike Galvin   https://gal.vin   Version 20.07.27                   "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
     Write-Host -Object ""
 }
@@ -254,13 +254,23 @@ Function OptionsRun
     If ($Null -eq $BacHistory -And $Compress -eq $False)
     {
         ## Remove all previous backup folders, including ones from previous versions of this script.
-        Get-ChildItem -Path $WorkDir -Filter "$ZName-*-*-***-*-*" -Directory | Remove-Item -Recurse -Force
+        try {
+            Get-ChildItem -Path $WorkDir -Filter "$ZName-*-*-***-*-*" -Directory | Remove-Item -Recurse -Force
+        }
+        catch{
+            $_.Exception.Message | Write-Log -Type Err -Evt $_
+        }
 
         ## If a working directory is configured by the user, remove all previous backup folders, including
         ## ones from previous versions of this script.
         If ($WorkDir -ne $Backup)
         {
-            Get-ChildItem -Path $Backup -Filter "$ZName-*-*-***-*-*" -Directory | Remove-Item -Recurse -Force
+            try {
+                Get-ChildItem -Path $Backup -Filter "$ZName-*-*-***-*-*" -Directory | Remove-Item -Recurse -Force
+            }
+            catch{
+                $_.Exception.Message | Write-Log -Type Err -Evt $_
+            }
         }
 
         Write-Log -Type Info -Evt "Removing previous backup folders"
@@ -272,14 +282,24 @@ Function OptionsRun
         {
             ## Remove previous backup folders older than the configured number of days, including
             ## ones from previous versions of this script.
-            Get-ChildItem -Path $WorkDir -Filter "$ZName-*-*-***-*-*" -Directory | Where-Object CreationTime –lt (Get-Date).AddDays(-$BacHistory) | Remove-Item -Recurse -Force
+            try {
+                Get-ChildItem -Path $WorkDir -Filter "$ZName-*-*-***-*-*" -Directory | Where-Object CreationTime –lt (Get-Date).AddDays(-$BacHistory) | Remove-Item -Recurse -Force
+            }
+            catch{
+                $_.Exception.Message | Write-Log -Type Err -Evt $_
+            }
 
             ## If a working directory is configured by the user, remove previous backup folders
             ## older than the configured number of days remove all previous backup folders,
             ## including ones from previous versions of this script.
             If ($WorkDir -ne $Backup)
             {
-                Get-ChildItem -Path $Backup -Filter "$ZName-*-*-***-*-*" -Directory | Where-Object CreationTime –lt (Get-Date).AddDays(-$BacHistory) | Remove-Item -Recurse -Force
+                try {
+                    Get-ChildItem -Path $Backup -Filter "$ZName-*-*-***-*-*" -Directory | Where-Object CreationTime –lt (Get-Date).AddDays(-$BacHistory) | Remove-Item -Recurse -Force
+                }
+                catch{
+                    $_.Exception.Message | Write-Log -Type Err -Evt $_
+                }
             }
 
             Write-Log -Type Info -Evt "Removing backup folders older than: $BacHistory days"
@@ -292,13 +312,23 @@ Function OptionsRun
         If ($Null -eq $BacHistory)
         {
             ## Remove all previous compressed backups, including ones from previous versions of this script.
-            Remove-Item "$WorkDir\$ZName-*-*-***-*-*.zip" -Force
+            try {
+                Remove-Item "$WorkDir\$ZName-*-*-***-*-*.zip" -Force
+            }
+            catch{
+                $_.Exception.Message | Write-Log -Type Err -Evt $_
+            }
 
             ## If a working directory is configured by the user, remove all previous compressed backups,
             ## including ones from previous versions of this script.
             If ($WorkDir -ne $Backup)
             {
-                Remove-Item "$Backup\$ZName-*-*-***-*-*.zip" -Force
+                try {
+                    Remove-Item "$Backup\$ZName-*-*-***-*-*.zip" -Force
+                }
+                catch{
+                    $_.Exception.Message | Write-Log -Type Err -Evt $_
+                }
             }
 
             Write-Log -Type Info -Evt "Removing previous compressed backups"
@@ -306,16 +336,25 @@ Function OptionsRun
 
         ## If the -compress switch IS configured AND if the -keep switch IS configured.
         else {
-            
             ## Remove previous compressed backups older than the configured number of days, including
             ## ones from previous versions of this script.
-            Get-ChildItem -Path "$WorkDir\$ZName-*-*-***-*-*.zip" | Where-Object CreationTime –lt (Get-Date).AddDays(-$BacHistory) | Remove-Item -Force
+            try {
+                Get-ChildItem -Path "$WorkDir\$ZName-*-*-***-*-*.zip" | Where-Object CreationTime –lt (Get-Date).AddDays(-$BacHistory) | Remove-Item -Force
+            }
+            catch{
+                $_.Exception.Message | Write-Log -Type Err -Evt $_
+            }
 
             ## If a working directory is configured by the user, remove previous compressed backups older
             ## than the configured number of days, including ones from previous versions of this script.
             If ($WorkDir -ne $Backup)
             {
-                Get-ChildItem -Path "$Backup\$ZName-*-*-***-*-*.zip" | Where-Object CreationTime –lt (Get-Date).AddDays(-$BacHistory) | Remove-Item -Force
+                try {
+                    Get-ChildItem -Path "$Backup\$ZName-*-*-***-*-*.zip" | Where-Object CreationTime –lt (Get-Date).AddDays(-$BacHistory) | Remove-Item -Force
+                }
+                catch{
+                    $_.Exception.Message | Write-Log -Type Err -Evt $_
+                }
             }
 
             Write-Log -Type Info -Evt "Removing compressed backups older than: $BacHistory days"
@@ -329,13 +368,24 @@ Function OptionsRun
             If ($7zT -eq $True)
             {
                 Write-Log -Type Info -Evt "Compressing using 7-Zip compression"
-                & "$env:programfiles\7-Zip\7z.exe" -bso0 a -tzip ("$WorkDir\$ZName-{0:yyyy-MM-dd_HH-mm-ss}.zip" -f (Get-Date)) "$WorkDir\$ZName\*"
+
+                try {
+                    & "$env:programfiles\7-Zip\7z.exe" -bso0 a -tzip ("$WorkDir\$ZName-{0:yyyy-MM-dd_HH-mm-ss}.zip" -f (Get-Date)) "$WorkDir\$ZName\*"
+                }
+                catch{
+                    $_.Exception.Message | Write-Log -Type Err -Evt $_
+                }
             }
 
             else {
                 Write-Log -Type Info -Evt "Compressing using Windows compression"
                 Add-Type -AssemblyName "system.io.compression.filesystem"
-                [io.compression.zipfile]::CreateFromDirectory("$WorkDir\$ZName", ("$WorkDir\$ZName-{0:yyyy-MM-dd_HH-mm-ss}.zip" -f (Get-Date)))
+                try {
+                    [io.compression.zipfile]::CreateFromDirectory("$WorkDir\$ZName", ("$WorkDir\$ZName-{0:yyyy-MM-dd_HH-mm-ss}.zip" -f (Get-Date)))
+                }
+                catch{
+                    $_.Exception.Message | Write-Log -Type Err -Evt $_
+                }
             }
         }
 
@@ -347,62 +397,45 @@ Function OptionsRun
             [io.compression.zipfile]::CreateFromDirectory("$WorkDir\$ZName", ("$WorkDir\$ZName-{0:yyyy-MM-dd_HH-mm-ss}.zip" -f (Get-Date)))
         }
 
-        ## Test if the compressed file was created.
-        $ZipT = Test-Path "$WorkDir\$ZName-*-*-***-*-*.zip"
-        If ($ZipT -eq $True)
-        {
-            Write-Log -Type Succ -Evt "Successfully created compressed backup in $WorkDir"
+        ## Clean up
+        try {
+            Get-ChildItem -Path $WorkDir -Filter "$ZName" -Directory | Remove-Item -Recurse -Force
         }
-
-        else {
-            Write-Log -Type Err -Evt "There was a problem creating a compressed backup in $WorkDir"
+        catch{
+            $_.Exception.Message | Write-Log -Type Err -Evt $_
         }
-        ## End of testing for file creation.
-
-        ## Remove the VMs export folder.
-        Get-ChildItem -Path $WorkDir -Filter "$ZName" -Directory | Remove-Item -Recurse -Force
 
         ## If a working directory has been configured by the user, move the compressed
         ## backup to the backup location and rename to include the date.
         If ($WorkDir -ne $Backup)
         {
-            Get-ChildItem -Path $WorkDir -Filter "$ZName-*-*-*-*-*.zip" | Move-Item -Destination $Backup
-
-            ## Test if the move suceeded.
-            $ZMoveT = Test-Path "$Backup\$ZName-*-*-*-*-*.zip"
-            If ($ZMoveT -eq $True)
-            {
-                Write-Log -Type Succ -Evt "Successfully moved compressed backup to $Backup"
+            try {
+                Get-ChildItem -Path $WorkDir -Filter "$ZName-*-*-*-*-*.zip" | Move-Item -Destination $Backup
             }
-
-            else {
-                Write-Log -Type Err -Evt "There was a problem moving compressed backup to $Backup"
+            catch{
+                $_.Exception.Message | Write-Log -Type Err -Evt $_
             }
-            ## End of testing for move.
         }
     }
 
     ## If the -compress switch is NOT configured AND if the -keep switch is NOT configured, rename
     ## the backup folder to include the date.
     else {
-        Get-ChildItem -Path $WorkDir -Filter $ZName -Directory | Rename-Item -NewName ("$WorkDir\$ZName-{0:yyyy-MM-dd_HH-mm-ss}" -f (Get-Date))
+        try {
+            Get-ChildItem -Path $WorkDir -Filter $ZName -Directory | Rename-Item -NewName ("$WorkDir\$ZName-{0:yyyy-MM-dd_HH-mm-ss}" -f (Get-Date))
+        }
+        catch{
+            $_.Exception.Message | Write-Log -Type Err -Evt $_
+        }
 
         If ($WorkDir -ne $Backup)
         {
-            Get-ChildItem -Path $WorkDir -Filter "$ZName-*-*-***-*-*" -Directory | Move-Item -Destination ("$Backup\$ZName-{0:yyyy-MM-dd_HH-mm-ss}" -f (Get-Date))
-
-            ## Test if the move suceeded.
-            $MoveT = Test-Path "$Backup\$ZName-*-*-***-*-*"
-            If ($MoveT -eq $True)
-            {
-                Write-Log -Type Succ -Evt "Successfully moved backup folder to $Backup"
+            try {
+                Get-ChildItem -Path $WorkDir -Filter "$ZName-*-*-***-*-*" -Directory | Move-Item -Destination ("$Backup\$ZName-{0:yyyy-MM-dd_HH-mm-ss}" -f (Get-Date))
             }
-
-            else {
-                Write-Log -Type Err -Evt "There was a problem moving backup folder to $Backup"
+            catch{
+                $_.Exception.Message | Write-Log -Type Err -Evt $_
             }
-
-            ## End of testing.
         }
     }
 }
@@ -556,21 +589,22 @@ If ($FileNo.count -ne 0)
         $BackupT = Test-Path "$WorkDir\$ZName"
         If ($BackupT -eq $True)
         {
-            Remove-Item "$WorkDir\$ZName" -Recurse -Force
+            try {
+                Remove-Item "$WorkDir\$ZName" -Recurse -Force
+            }
+            catch{
+                $_.Exception.Message | Write-Log -Type Err -Evt $_
+            }
         }
 
-        New-Item -Path "$WorkDir\$ZName" -ItemType Directory | Out-Null
-        Get-ChildItem -Path $Source | Where-Object CreationTime –lt (Get-Date).AddDays(-$LogHistory) | Copy-Item -Destination "$WorkDir\$ZName" -Recurse -Force
+        Write-Log -Type Info -Evt "Attempting to move objects older than: $LogHistory days"
 
-        $DirMoveT = Test-Path -Path "$WorkDir\$ZName\*"
-
-        If ($DirMoveT -eq $True)
-        {
-            Write-Log -Type Succ -Evt "Successfully moved objects older than: $LogHistory days"
+        try {
+            New-Item -Path "$WorkDir\$ZName" -ItemType Directory | Out-Null
+            Get-ChildItem -Path $Source | Where-Object CreationTime –lt (Get-Date).AddDays(-$LogHistory) | Copy-Item -Destination "$WorkDir\$ZName" -Recurse -Force
         }
-
-        else {
-            Write-Log -Type Err -Evt "There was an error moving objects older than: $LogHistory days"
+        catch{
+            $_.Exception.Message | Write-Log -Type Err -Evt $_
         }
 
         OptionsRun
