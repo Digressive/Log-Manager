@@ -15,7 +15,7 @@ Flexible clean up and backup of log files.
       Mike Galvin    https://gal.vin    Version 20.07.27
 ```
 
-For full instructions and documentation, [visit my site.](https://gal.vin/2017/06/13/powershell-log-manager)
+For full instructions and documentation, [visit my site.](https://gal.vin/posts/powershell-log-manager)
 
 Please consider supporting my work:
 
