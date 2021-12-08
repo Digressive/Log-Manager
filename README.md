@@ -36,7 +36,7 @@ Join the [Discord](http://discord.gg/5ZsnJ5k) or Tweet me if you have questions:
 * Can also backup files and folders older than X days to another location.
 * Backup files and folders as a zip file.
 * The utility requires at least PowerShell 5.0
-* This utility has been tested on Windows 10, Windows Server 2019, Windows Server 2016 and Windows Server 2012 R2 (Datacenter and Core Installations) with PowerShell 5.0.
+* This utility has been tested on Windows 10, Windows Server 2019, Windows Server 2016 and Windows Server 2012 R2 (Datacenter and Core Installations).
 
 ### Generating A Password File
 
