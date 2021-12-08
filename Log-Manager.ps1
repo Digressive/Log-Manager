@@ -1,6 +1,6 @@
 ﻿<#PSScriptInfo
 
-.VERSION 20.07.27
+.VERSION 21.12.08
 
 .GUID 109eb5a2-1dd4-4def-9b9e-1d7413c8697f
 
@@ -41,7 +41,7 @@
     To create the password file run this command as the user and on the machine that will use the file:
 
     $creds = Get-Credential
-    $creds.Password | ConvertFrom-SecureString | Set-Content c:\foo\ps-script-pwd.txt
+    $creds.Password | ConvertFrom-SecureString | Set-Content C:\scripts\ps-script-pwd.txt
 
     .PARAMETER LogsPath
     The path that contains the logs that the utility should process.
@@ -99,6 +99,9 @@
     .PARAMETER Smtp
     The DNS name or IP address of the SMTP server.
 
+    .PARAMETER Port
+    The Port that should be used for the SMTP server.
+
     .PARAMETER User
     The user account to authenticate to the SMTP server.
 
@@ -111,7 +114,7 @@
     .EXAMPLE
     Log-Manager.ps1 -LogsPath C:\inetpub\logs\LogFiles\W3SVC*\* -LogKeep 30 -BackupTo \\nas\archive -BacKeep 30
     -Wd C:\temp -Compress -L C:\scripts\logs -Subject 'Server: Log Manager' -SendTo me@contoso.com
-    -From Log-Manager@contoso.com -Smtp smtp.outlook.com -User me@contoso.com -Pwd C:\foo\pwd.txt -UseSsl
+    -From Log-Manager@contoso.com -Smtp smtp.outlook.com -User me@contoso.com -Pwd c:\scripts\ps-script-pwd.txt -UseSsl
 
     The above command will backup and remove IIS logs older than 30 days. It will create a zip folder using the
     C:\temp folder as a working directory and the file will be stored in \\nas\archive.
@@ -137,7 +140,6 @@ Param(
     [alias("ZipName")]
     $ZName,
     [alias("L")]
-    [ValidateScript({Test-Path $_ -PathType 'Container'})]
     $LogPath,
     [alias("Subject")]
     $MailSubject,
@@ -171,7 +173,7 @@ If ($NoBanner -eq $False)
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "  (______) (__) (____)(____)(____) (__)  (__)                          "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
-    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "    Mike Galvin   https://gal.vin   Version 20.07.27                   "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "    Mike Galvin   https://gal.vin   Version 21.12.08                   "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
     Write-Host -Object ""
 }
@@ -180,6 +182,14 @@ If ($NoBanner -eq $False)
 ## If the log file already exists, clear it.
 If ($LogPath)
 {
+    ## Make sure the log directory exists.
+    $LogPathFolderT = Test-Path $LogPath
+
+    If ($LogPathFolderT -eq $False)
+    {
+        New-Item $LogPath -ItemType Directory -Force | Out-Null
+    }
+
     $LogFile = ("Log-Man_{0:yyyy-MM-dd_HH-mm-ss}.log" -f (Get-Date))
     $Log = "$LogPath\$LogFile"
 
@@ -480,11 +490,20 @@ If ($FileNo.count -ne 0)
         $ZName = "Logs-$env:computername"
     }
 
+    ## getting Windows Version info
+    $OSVMaj = [environment]::OSVersion.Version | Select-Object -expand major
+    $OSVMin = [environment]::OSVersion.Version | Select-Object -expand minor
+    $OSVBui = [environment]::OSVersion.Version | Select-Object -expand build
+    $OSV = "$OSVMaj" + "." + "$OSVMin" + "." + "$OSVBui"
+
     ##
     ## Display the current config and log if configured.
     ##
+
     Write-Log -Type Conf -Evt "************ Running with the following config *************."
-    Write-Log -Type Conf -Evt "Script running on:.....$env:computername."
+    Write-Log -Type Conf -Evt "Utility Version:.......21.12.08"
+    Write-Log -Type Conf -Evt "Hostname:..............$Env:ComputerName."
+    Write-Log -Type Conf -Evt "Windows Version:.......$OSV."
     Write-Log -Type Conf -Evt "Path to process:.......$Source."
     Write-Log -Type Conf -Evt "Logs to keep:..........$LogHistory days"
 
@@ -548,6 +567,15 @@ If ($FileNo.count -ne 0)
         Write-Log -Type Conf -Evt "SMTP server:...........No Config"
     }
 
+    If ($SmtpPort)
+    {
+        Write-Log -Type Conf -Evt "SMTP Port:...............$SmtpPort."
+    }
+
+    else {
+        Write-Log -Type Conf -Evt "SMTP Port:...............Default"
+    }
+
     If ($SmtpUser)
     {
         Write-Log -Type Conf -Evt "SMTP user:.............$SmtpUser."
@@ -571,6 +599,7 @@ If ($FileNo.count -ne 0)
     Write-Log -Type Conf -Evt "-Sz switch:............$Sz."
     Write-Log -Type Conf -Evt "************************************************************"
     Write-Log -Type Info -Evt "Process started"
+
     ##
     ## Display current config ends here.
     ##
@@ -638,6 +667,12 @@ If ($LogPath)
         If ($Null -eq $MailSubject)
         {
             $MailSubject = "Log Manager Utility Log"
+        }
+
+        ## Default Smtp Port if none is configured.
+        If ($Null -eq $SmtpPort)
+        {
+            $SmtpPort = "25"
         }
 
         ## Setting the contents of the log to be the e-mail body. 
