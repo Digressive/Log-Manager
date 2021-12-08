@@ -1,6 +1,6 @@
 ﻿<#PSScriptInfo
 
-.VERSION 21.12.08a
+.VERSION 21.12.08.01
 
 .GUID 109eb5a2-1dd4-4def-9b9e-1d7413c8697f
 
@@ -175,7 +175,7 @@ If ($NoBanner -eq $False)
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "  (______) (__) (____)(____)(____) (__)  (__)                          "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
-    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "    Mike Galvin   https://gal.vin   Version 21.12.08a                  "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "    Mike Galvin   https://gal.vin   Version 21.12.08.01                "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
     Write-Host -Object ""
 }
@@ -503,7 +503,7 @@ If ($FileNo.count -ne 0)
     ##
 
     Write-Log -Type Conf -Evt "************ Running with the following config *************."
-    Write-Log -Type Conf -Evt "Utility Version:.......21.12.08a"
+    Write-Log -Type Conf -Evt "Utility Version:.......21.12.08.01"
     Write-Log -Type Conf -Evt "Hostname:..............$Env:ComputerName."
     Write-Log -Type Conf -Evt "Windows Version:.......$OSV."
     Write-Log -Type Conf -Evt "Path to process:.......$Source."
