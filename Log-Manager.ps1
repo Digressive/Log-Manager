@@ -1,6 +1,6 @@
 ﻿<#PSScriptInfo
 
-.VERSION 21.12.08.01
+.VERSION 21.12.09
 
 .GUID 109eb5a2-1dd4-4def-9b9e-1d7413c8697f
 
@@ -175,7 +175,7 @@ If ($NoBanner -eq $False)
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "  (______) (__) (____)(____)(____) (__)  (__)                          "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
-    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "    Mike Galvin   https://gal.vin   Version 21.12.08.01                "
+    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "    Mike Galvin   https://gal.vin   Version 21.12.09                   "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
     Write-Host -Object ""
 }
@@ -460,6 +460,120 @@ Function OptionsRun
 ## Start main process.
 ##
 
+## getting Windows Version info
+$OSVMaj = [environment]::OSVersion.Version | Select-Object -expand major
+$OSVMin = [environment]::OSVersion.Version | Select-Object -expand minor
+$OSVBui = [environment]::OSVersion.Version | Select-Object -expand build
+$OSV = "$OSVMaj" + "." + "$OSVMin" + "." + "$OSVBui"
+
+##
+## Display the current config and log if configured.
+##
+
+Write-Log -Type Conf -Evt "************ Running with the following config *************."
+Write-Log -Type Conf -Evt "Utility Version:.......21.12.09"
+Write-Log -Type Conf -Evt "Hostname:..............$Env:ComputerName."
+Write-Log -Type Conf -Evt "Windows Version:.......$OSV."
+Write-Log -Type Conf -Evt "Path to process:.......$Source."
+Write-Log -Type Conf -Evt "Logs to keep:..........$LogHistory days"
+
+If ($Backup)
+{
+    Write-Log -Type Conf -Evt "Backup directory:......$Backup."
+    Write-Log -Type Conf -Evt "Working directory:.....$WorkDir."
+    Write-Log -Type Conf -Evt "Backups to keep:.......$BacHistory days"
+    Write-Log -Type Conf -Evt "Zip file name:.........$ZName + date and time."
+}
+
+else {
+    Write-Log -Type Conf -Evt "Backup directory:......No Config"
+    Write-Log -Type Conf -Evt "Working directory:.....No Config"
+    Write-Log -Type Conf -Evt "Backups to keep:.......No Config"
+    Write-Log -Type Conf -Evt "Zip file name:.........No Config"
+}
+
+If ($LogPath)
+{
+    Write-Log -Type Conf -Evt "Log directory:.........$LogPath."
+}
+
+else {
+    Write-Log -Type Conf -Evt "Log directory:.........No Config"
+}
+
+If ($MailTo)
+{
+    Write-Log -Type Conf -Evt "E-mail log to:.........$MailTo."
+}
+
+else {
+    Write-Log -Type Conf -Evt "E-mail log to:.........No Config"
+}
+
+If ($MailFrom)
+{
+    Write-Log -Type Conf -Evt "E-mail log from:.......$MailFrom."
+}
+
+else {
+    Write-Log -Type Conf -Evt "E-mail log from:.......No Config"
+}
+
+If ($MailSubject)
+{
+    Write-Log -Type Conf -Evt "E-mail subject:........$MailSubject."
+}
+
+else {
+    Write-Log -Type Conf -Evt "E-mail subject:........Default"
+}
+
+If ($SmtpServer)
+{
+    Write-Log -Type Conf -Evt "SMTP server:...........$SmtpServer."
+}
+
+else {
+    Write-Log -Type Conf -Evt "SMTP server:...........No Config"
+}
+
+If ($SmtpPort)
+{
+    Write-Log -Type Conf -Evt "SMTP Port:.............$SmtpPort."
+}
+
+else {
+    Write-Log -Type Conf -Evt "SMTP Port:.............Default"
+}
+
+If ($SmtpUser)
+{
+    Write-Log -Type Conf -Evt "SMTP user:.............$SmtpUser."
+}
+
+else {
+    Write-Log -Type Conf -Evt "SMTP user:.............No Config"
+}
+
+If ($SmtpPwd)
+{
+    Write-Log -Type Conf -Evt "SMTP pwd file:.........$SmtpPwd."
+}
+
+else {
+    Write-Log -Type Conf -Evt "SMTP pwd file:.........No Config"
+}
+
+Write-Log -Type Conf -Evt "-UseSSL switch:........$UseSsl."
+Write-Log -Type Conf -Evt "-Compress switch:......$Compress."
+Write-Log -Type Conf -Evt "-Sz switch:............$Sz."
+Write-Log -Type Conf -Evt "************************************************************"
+Write-Log -Type Info -Evt "Process started"
+
+##
+## Display current config ends here.
+##
+
 ## Count the number of files that are old enough to work on in the configured directory
 ## If the number of the files to work on is not zero then proceed.
 $FileNo = Get-ChildItem -Path $Source –Recurse | Where-Object CreationTime –lt (Get-Date).AddDays(-$LogHistory) | Measure-Object
@@ -491,120 +605,6 @@ If ($FileNo.count -ne 0)
     {
         $ZName = "Logs-$env:computername"
     }
-
-    ## getting Windows Version info
-    $OSVMaj = [environment]::OSVersion.Version | Select-Object -expand major
-    $OSVMin = [environment]::OSVersion.Version | Select-Object -expand minor
-    $OSVBui = [environment]::OSVersion.Version | Select-Object -expand build
-    $OSV = "$OSVMaj" + "." + "$OSVMin" + "." + "$OSVBui"
-
-    ##
-    ## Display the current config and log if configured.
-    ##
-
-    Write-Log -Type Conf -Evt "************ Running with the following config *************."
-    Write-Log -Type Conf -Evt "Utility Version:.......21.12.08.01"
-    Write-Log -Type Conf -Evt "Hostname:..............$Env:ComputerName."
-    Write-Log -Type Conf -Evt "Windows Version:.......$OSV."
-    Write-Log -Type Conf -Evt "Path to process:.......$Source."
-    Write-Log -Type Conf -Evt "Logs to keep:..........$LogHistory days"
-
-    If ($Backup)
-    {
-        Write-Log -Type Conf -Evt "Backup directory:......$Backup."
-        Write-Log -Type Conf -Evt "Working directory:.....$WorkDir."
-        Write-Log -Type Conf -Evt "Backups to keep:.......$BacHistory days"
-        Write-Log -Type Conf -Evt "Zip file name:.........$ZName + date and time."
-    }
-
-    else {
-        Write-Log -Type Conf -Evt "Backup directory:......No Config"
-        Write-Log -Type Conf -Evt "Working directory:.....No Config"
-        Write-Log -Type Conf -Evt "Backups to keep:.......No Config"
-        Write-Log -Type Conf -Evt "Zip file name:.........No Config"
-    }
-
-    If ($LogPath)
-    {
-        Write-Log -Type Conf -Evt "Log directory:.........$LogPath."
-    }
-
-    else {
-        Write-Log -Type Conf -Evt "Log directory:.........No Config"
-    }
-
-    If ($MailTo)
-    {
-        Write-Log -Type Conf -Evt "E-mail log to:.........$MailTo."
-    }
-
-    else {
-        Write-Log -Type Conf -Evt "E-mail log to:.........No Config"
-    }
-
-    If ($MailFrom)
-    {
-        Write-Log -Type Conf -Evt "E-mail log from:.......$MailFrom."
-    }
-
-    else {
-        Write-Log -Type Conf -Evt "E-mail log from:.......No Config"
-    }
-
-    If ($MailSubject)
-    {
-        Write-Log -Type Conf -Evt "E-mail subject:........$MailSubject."
-    }
-
-    else {
-        Write-Log -Type Conf -Evt "E-mail subject:........Default"
-    }
-
-    If ($SmtpServer)
-    {
-        Write-Log -Type Conf -Evt "SMTP server:...........$SmtpServer."
-    }
-
-    else {
-        Write-Log -Type Conf -Evt "SMTP server:...........No Config"
-    }
-
-    If ($SmtpPort)
-    {
-        Write-Log -Type Conf -Evt "SMTP Port:.............$SmtpPort."
-    }
-
-    else {
-        Write-Log -Type Conf -Evt "SMTP Port:.............Default"
-    }
-
-    If ($SmtpUser)
-    {
-        Write-Log -Type Conf -Evt "SMTP user:.............$SmtpUser."
-    }
-
-    else {
-        Write-Log -Type Conf -Evt "SMTP user:.............No Config"
-    }
-
-    If ($SmtpPwd)
-    {
-        Write-Log -Type Conf -Evt "SMTP pwd file:.........$SmtpPwd."
-    }
-
-    else {
-        Write-Log -Type Conf -Evt "SMTP pwd file:.........No Config"
-    }
-
-    Write-Log -Type Conf -Evt "-UseSSL switch:........$UseSsl."
-    Write-Log -Type Conf -Evt "-Compress switch:......$Compress."
-    Write-Log -Type Conf -Evt "-Sz switch:............$Sz."
-    Write-Log -Type Conf -Evt "************************************************************"
-    Write-Log -Type Info -Evt "Process started"
-
-    ##
-    ## Display current config ends here.
-    ##
 
     Write-Log -Type Info -Evt "The following objects will be processed:"
     Get-ChildItem -Path $Source | Select-Object -ExpandProperty Name

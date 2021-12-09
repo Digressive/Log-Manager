@@ -12,7 +12,7 @@ Flexible clean up and backup of log files.
  )(__)(   )(   _)(_  )(__  _)(_   )(   \  /
 (______) (__) (____)(____)(____) (__)  (__)
 
-      Mike Galvin    https://gal.vin    Version 21.12.08.01
+      Mike Galvin    https://gal.vin    Version 21.12.09
 ```
 
 For full instructions and documentation, [visit my site.](https://gal.vin/posts/powershell-log-manager)
