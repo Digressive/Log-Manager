@@ -2,19 +2,6 @@
 
 Flexible clean up and backup of log files.
 
-``` txt
- __    _____  ___    __  __    __    _  _    __    ___  ____  ____
-(  )  (  _  )/ __)  (  \/  )  /__\  ( \( )  /__\  / __)( ___)(  _ \
- )(__  )(_)(( (_-.   )    (  /(__)\  )  (  /(__)\( (_-. )__)  )   /
-(____)(_____)\___/  (_/\/\_)(__)(__)(_)\_)(__)(__)\___/(____)(_)\_)
- __  __  ____  ____  __    ____  ____  _  _
-(  )(  )(_  _)(_  _)(  )  (_  _)(_  _)( \/ )
- )(__)(   )(   _)(_  )(__  _)(_   )(   \  /
-(______) (__) (____)(____)(____) (__)  (__)
-
-      Mike Galvin    https://gal.vin    Version 21.12.09
-```
-
 For full instructions and documentation, [visit my site.](https://gal.vin/posts/powershell-log-manager)
 
 Please consider supporting my work:

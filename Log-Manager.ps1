@@ -174,7 +174,6 @@ If ($NoBanner -eq $False)
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "   )(__)(   )(   _)(_  )(__  _)(_   )(   \  /                          "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "  (______) (__) (____)(____)(____) (__)  (__)                          "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
-    Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "    Mike Galvin   https://gal.vin   Version 21.12.09                   "
     Write-Host -ForegroundColor Yellow -BackgroundColor Black -Object "                                                                       "
     Write-Host -Object ""
@@ -295,7 +294,7 @@ Function OptionsRun
             ## Remove previous backup folders older than the configured number of days, including
             ## ones from previous versions of this script.
             try {
-                Get-ChildItem -Path $WorkDir -Filter "$ZName-*-*-***-*-*" -Directory | Where-Object CreationTime –lt (Get-Date).AddDays(-$BacHistory) | Remove-Item -Recurse -Force
+                Get-ChildItem -Path $WorkDir -Filter "$ZName-*-*-***-*-*" -Directory | Where-Object CreationTime -lt (Get-Date).AddDays(-$BacHistory) | Remove-Item -Recurse -Force
             }
             catch{
                 $_.Exception.Message | Write-Log -Type Err -Evt $_
@@ -307,7 +306,7 @@ Function OptionsRun
             If ($WorkDir -ne $Backup)
             {
                 try {
-                    Get-ChildItem -Path $Backup -Filter "$ZName-*-*-***-*-*" -Directory | Where-Object CreationTime –lt (Get-Date).AddDays(-$BacHistory) | Remove-Item -Recurse -Force
+                    Get-ChildItem -Path $Backup -Filter "$ZName-*-*-***-*-*" -Directory | Where-Object CreationTime -lt (Get-Date).AddDays(-$BacHistory) | Remove-Item -Recurse -Force
                 }
                 catch{
                     $_.Exception.Message | Write-Log -Type Err -Evt $_
@@ -351,7 +350,7 @@ Function OptionsRun
             ## Remove previous compressed backups older than the configured number of days, including
             ## ones from previous versions of this script.
             try {
-                Get-ChildItem -Path "$WorkDir\$ZName-*-*-***-*-*.zip" | Where-Object CreationTime –lt (Get-Date).AddDays(-$BacHistory) | Remove-Item -Force
+                Get-ChildItem -Path "$WorkDir\$ZName-*-*-***-*-*.zip" | Where-Object CreationTime -lt (Get-Date).AddDays(-$BacHistory) | Remove-Item -Force
             }
             catch{
                 $_.Exception.Message | Write-Log -Type Err -Evt $_
@@ -362,7 +361,7 @@ Function OptionsRun
             If ($WorkDir -ne $Backup)
             {
                 try {
-                    Get-ChildItem -Path "$Backup\$ZName-*-*-***-*-*.zip" | Where-Object CreationTime –lt (Get-Date).AddDays(-$BacHistory) | Remove-Item -Force
+                    Get-ChildItem -Path "$Backup\$ZName-*-*-***-*-*.zip" | Where-Object CreationTime -lt (Get-Date).AddDays(-$BacHistory) | Remove-Item -Force
                 }
                 catch{
                     $_.Exception.Message | Write-Log -Type Err -Evt $_
@@ -576,7 +575,7 @@ Write-Log -Type Info -Evt "Process started"
 
 ## Count the number of files that are old enough to work on in the configured directory
 ## If the number of the files to work on is not zero then proceed.
-$FileNo = Get-ChildItem -Path $Source –Recurse | Where-Object CreationTime –lt (Get-Date).AddDays(-$LogHistory) | Measure-Object
+$FileNo = Get-ChildItem -Path $Source -Recurse | Where-Object CreationTime -lt (Get-Date).AddDays(-$LogHistory) | Measure-Object
 
 If ($FileNo.count -ne 0)
 {
@@ -632,7 +631,7 @@ If ($FileNo.count -ne 0)
 
         try {
             New-Item -Path "$WorkDir\$ZName" -ItemType Directory | Out-Null
-            Get-ChildItem -Path $Source | Where-Object CreationTime –lt (Get-Date).AddDays(-$LogHistory) | Copy-Item -Destination "$WorkDir\$ZName" -Recurse -Force
+            Get-ChildItem -Path $Source | Where-Object CreationTime -lt (Get-Date).AddDays(-$LogHistory) | Copy-Item -Destination "$WorkDir\$ZName" -Recurse -Force
         }
         catch{
             $_.Exception.Message | Write-Log -Type Err -Evt $_
@@ -642,7 +641,7 @@ If ($FileNo.count -ne 0)
     }
 
     ## If no backup options were configured, or after doing the previous operations, remove the old files.
-    Get-ChildItem -Path $Source | Where-Object CreationTime –lt (Get-Date).AddDays(-$LogHistory) | Remove-Item -Recurse
+    Get-ChildItem -Path $Source | Where-Object CreationTime -lt (Get-Date).AddDays(-$LogHistory) | Remove-Item -Recurse
     Write-Log -Type Info -Evt "Deleting logs older than: $LogHistory days"
 
     ##
