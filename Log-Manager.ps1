@@ -14,7 +14,7 @@
 
 .LICENSEURI
 
-.PROJECTURI https://gal.vin/posts/powershell-log-manager/
+.PROJECTURI https://gal.vin/utils/log-manager-utility/
 
 .ICONURI
 

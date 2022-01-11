@@ -2,7 +2,7 @@
 
 Flexible clean up and backup of log files.
 
-For full instructions and documentation, [visit my site.](https://gal.vin/posts/powershell-log-manager)
+For full instructions and documentation, [visit my site.](https://gal.vin/utils/log-manager-utility/)
 
 Please consider supporting my work:
 
