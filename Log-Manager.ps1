@@ -143,7 +143,7 @@ Param(
     [alias("ZipName")]
     $ZName,
     [alias("L")]
-    $LogPath,
+    $LogPathUsr,
     [alias("LogRotate")]
     $LogManOwnHistory,
     [alias("Subject")]
@@ -225,8 +225,11 @@ Usage:
 else {
     ## If logging is configured, start logging.
     ## If the log file already exists, clear it.
-    If ($LogPath)
+    If ($LogPathUsr)
     {
+        ## Clean User entered string
+        $LogPath = $LogPathUsr.trimend('\')
+
         ## Make sure the log directory exists.
         If ((Test-Path -Path $LogPath) -eq $False)
         {
@@ -256,7 +259,7 @@ else {
     {
         If ($Type -eq "Info")
         {
-            If ($LogPath)
+            If ($LogPathUsr)
             {
                 Add-Content -Path $Log -Encoding ASCII -Value "$(Get-DateFormat) [INFO] $Evt"
             }
@@ -266,7 +269,7 @@ else {
 
         If ($Type -eq "Succ")
         {
-            If ($LogPath)
+            If ($LogPathUsr)
             {
                 Add-Content -Path $Log -Encoding ASCII -Value "$(Get-DateFormat) [SUCCESS] $Evt"
             }
@@ -276,7 +279,7 @@ else {
 
         If ($Type -eq "Err")
         {
-            If ($LogPath)
+            If ($LogPathUsr)
             {
                 Add-Content -Path $Log -Encoding ASCII -Value "$(Get-DateFormat) [ERROR] $Evt"
             }
@@ -286,7 +289,7 @@ else {
 
         If ($Type -eq "Conf")
         {
-            If ($LogPath)
+            If ($LogPathUsr)
             {
                 Add-Content -Path $Log -Encoding ASCII -Value "$Evt"
             }
@@ -537,7 +540,7 @@ else {
         Write-Log -Type Conf -Evt "Zip file name:.........$ZName + date and time."
     }
 
-    If ($LogPath)
+    If ($LogPathUsr)
     {
         Write-Log -Type Conf -Evt "Log directory:.........$LogPath."
     }
@@ -635,7 +638,7 @@ else {
         Write-Log -Type Info -Evt "The following objects will be processed:"
         Get-ChildItem -Path $Source | Select-Object -ExpandProperty Name
 
-        If ($LogPath)
+        If ($LogPathUsr)
         {
             Get-ChildItem -Path $Source | Select-Object -ExpandProperty Name | Out-File -Append $Log -Encoding ASCII
         }
@@ -690,7 +693,7 @@ else {
     }
 
     ## If logging is configured then finish the log file.
-    If ($LogPath)
+    If ($LogPathUsr)
     {
         ## This whole block is for e-mail, if it is configured.
         If ($SmtpServer)
