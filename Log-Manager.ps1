@@ -131,15 +131,15 @@
 [CmdletBinding()]
 Param(
     [alias("LogsPath")]
-    $Source,
+    $SourceUsr,
     [alias("LogKeep")]
     $LogHistory,
     [alias("BackupTo")]
-    $Backup,
+    $BackupUsr,
     [alias("BacKeep")]
     $BacHistory,
     [alias("Wd")]
-    $WorkDir,
+    $WorkDirUsr,
     [alias("ZipName")]
     $ZName,
     [alias("L")]
@@ -496,6 +496,59 @@ else {
     ##
     ## Start main process.
     ##
+
+    If ($Null -eq $SourceUsr)
+    {
+        Write-Log -Type Err -Evt "You must specify -LogPath."
+        Exit
+    }
+
+    else {
+        ## Clean User entered string
+        $Source = $SourceUsr.trimend('\')
+
+        If ($Null -eq $BackupUsr -And $BacHistory)
+        {
+            Write-Log -Type Err -Evt "You must specify -BackupTo to use -BacKeep."
+            Exit
+        }
+
+        If ($Null -eq $BackupUsr -And $WorkDirUsr)
+        {
+            Write-Log -Type Err -Evt "You must specify -BackupTo to use -Wd."
+            Exit
+        }
+
+        If ($Compress -eq $false -And $Null -ne $ZName)
+        {
+            Write-Log -Type Err -Evt "You must specify -Compress to use -ZipName."
+            Exit
+        }
+
+        If ($Compress -eq $false -And $Sz -eq $true)
+        {
+            Write-Log -Type Err -Evt "You must specify -Compress to use -Sz."
+            Exit
+        }
+
+        If ($Compress -eq $true -And $Null -eq $BackupUsr)
+        {
+            Write-Log -Type Err -Evt "You must specify -BackupTo to use -Compress."
+            Exit
+        }
+
+        ## Clean User entered string
+        If ($BackupUsr)
+        {
+            $Backup = $BackupUsr.trimend('\')
+        }
+
+        If ($WorkDirUsr)
+        {
+            $WorkDir = $WorkDirUsr.trimend('\')
+        }
+    }
+
     ## getting Windows Version info
     $OSVMaj = [environment]::OSVersion.Version | Select-Object -expand major
     $OSVMin = [environment]::OSVersion.Version | Select-Object -expand minor
@@ -510,9 +563,9 @@ else {
     Write-Log -Type Conf -Evt "Hostname:..............$Env:ComputerName."
     Write-Log -Type Conf -Evt "Windows Version:.......$OSV."
 
-    If ($Source)
+    If ($SourceUsr)
     {
-        Write-Log -Type Conf -Evt "Path to process:.......$Source."
+        Write-Log -Type Conf -Evt "Path to process:.......$SourceUsr."
     }
 
     If ($Null -ne $LogHistory)
@@ -520,14 +573,14 @@ else {
         Write-Log -Type Conf -Evt "Logs to keep:..........$LogHistory days"
     }
 
-    If ($Backup)
+    If ($BackupUsr)
     {
-        Write-Log -Type Conf -Evt "Backup directory:......$Backup."
+        Write-Log -Type Conf -Evt "Backup directory:......$BackupUsr."
     }
 
-    If ($WorkDir)
+    If ($WorkDirUsr)
     {
-        Write-Log -Type Conf -Evt "Working directory:.....$WorkDir."
+        Write-Log -Type Conf -Evt "Working directory:.....$WorkDirUsr."
     }
 
     If ($Null -ne $BacHistory)
@@ -538,6 +591,16 @@ else {
     If ($ZName)
     {
         Write-Log -Type Conf -Evt "Zip file name:.........$ZName + date and time."
+    }
+
+    If ($Compress)
+    {
+        Write-Log -Type Conf -Evt "-Compress switch is:...$Compress."
+    }
+
+    If ($Sz)
+    {
+        Write-Log -Type Conf -Evt "-Sz switch is:.........$Sz."
     }
 
     If ($LogPathUsr)
@@ -589,8 +652,6 @@ else {
     {
         Write-Log -Type Conf -Evt "-UseSSL switch is:.....$UseSsl."
     }
-    Write-Log -Type Conf -Evt "-Compress switch is:...$Compress."
-    Write-Log -Type Conf -Evt "-Sz switch is:.........$Sz."
     Write-Log -Type Conf -Evt "************************************************************"
     Write-Log -Type Info -Evt "Process started"
     ##
@@ -615,7 +676,7 @@ else {
         }
 
         ## If the user has not configured the working directory, set it as the backup directory if needed.
-        If ($Backup)
+        If ($BackupUsr)
         {
             ## Make sure the directory exists.
             If ((Test-Path -Path $Backup) -eq $False)
@@ -623,7 +684,7 @@ else {
                 New-Item $Backup -ItemType Directory -Force | Out-Null
             }
 
-            If ($Null -eq $WorkDir)
+            If ($Null -eq $WorkDirUsr)
             {
                 $WorkDir = "$Backup"
             }
@@ -643,7 +704,7 @@ else {
             Get-ChildItem -Path $Source | Select-Object -ExpandProperty Name | Out-File -Append $Log -Encoding ASCII
         }
 
-        If ($Backup)
+        If ($BackupUsr)
         {
             ## Test for the existence of a previous backup. If it exists, delete it.
             If (Test-Path -Path "$WorkDir\$ZName")
@@ -688,7 +749,7 @@ else {
     If ($Null -ne $LogManOwnHistory)
     {
         ## Cleanup logs.
-        Write-Log -Type Info -Evt "Deleting logs older than: $LogManOwnHistory days"
+        Write-Log -Type Info -Evt "Deleting Log Manager logs older than: $LogManOwnHistory days"
         Get-ChildItem -Path "$LogPath\Log-Man_*" -File | Where-Object CreationTime -lt (Get-Date).AddDays(-$LogManOwnHistory) | Remove-Item -Recurse
     }
 
