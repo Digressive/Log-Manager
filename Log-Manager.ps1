@@ -499,7 +499,7 @@ else {
 
     If ($Null -eq $SourceUsr)
     {
-        Write-Log -Type Err -Evt "You must specify -LogPath."
+        Write-Log -Type Err -Evt "You must specify -LogsPath."
         Exit
     }
 
@@ -804,10 +804,10 @@ else {
                     Send-MailMessage -To $MailAddress -From $MailFrom -Subject $MailSubject -Body $MailBody -SmtpServer $SmtpServer -Port $SmtpPort
                 }
             }
+        }
 
-            else {
-                Write-Host -ForegroundColor Red -BackgroundColor Black -Object "There's no log file to email."
-            }
+        else {
+            Write-Host -ForegroundColor Red -BackgroundColor Black -Object "There's no log file to email."
         }
     }
     ## End of Email block
