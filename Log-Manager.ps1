@@ -33,98 +33,8 @@
     Log Manager Utility - Flexible clean up and backup of log files.
 
     .DESCRIPTION
-    This utility will delete files and folders older than X days.
-    It can also backup files and folders older than X days to another location.
-
-    To send a log file via e-mail using ssl and an SMTP password you must generate an encrypted password file.
-    The password file is unique to both the user and machine.
-    To create the password file run this command as the user and on the machine that will use the file:
-
-    $creds = Get-Credential
-    $creds.Password | ConvertFrom-SecureString | Set-Content C:\scripts\ps-script-pwd.txt
-
-    .PARAMETER LogsPath
-    The path that contains the logs that the utility should process.
-
-    .PARAMETER LogKeep
-    Instructs the utility to keep a specified number of days’ worth of logs.
-    Logs older than the number of days specified will be deleted.
-
-    .PARAMETER BackupTo
-    The path the logs should be backed up to.
-    A folder will be created inside this location.
-    Do not add a trailing backslash.
-    If this option is not used, backup will not be performed.
-
-    .PARAMETER BacKeep
-    Instructs the utility to keep a specified number of days’ worth of backups.
-    Backups older than the number of days specified will be deleted.
-    Only backup folders or zip files created by this utility will be removed.
-
-    .PARAMETER Compress
-    This option will create a zip file of the log files.
-
-    .PARAMETER Wd
-    The path to the working directory to use for the backup before copying it to the final backup directory.
-    Use a directory on local fast media to improve performance.
-
-    .PARAMETER ZipName
-    Enter the name of the zip file you wish to have.
-    If the name includes a space, encapsulate with single quotes.
-    The time and date will be appended to this name.
-    If this option is not used, a default name of logs-HOSTNAME-date-time.zip will be used.
-
-    .PARAMETER Sz
-    Configure the utility to use 7-Zip to compress the log files.
-    7-Zip must be installed in the default location ($env:ProgramFiles) if it is not found, Windows compression will be used as a fallback.
-
-    .PARAMETER NoBanner
-    Use this option to hide the ASCII art title in the console.
-
-    .PARAMETER L
-    The path to output the log file to.
-    The file name will be Log-Man_YYYY-MM-dd_HH-mm-ss.log
-    Do not add a trailing \ backslash.
-
-    .PARAMETER LogRotate
-    Instructs the utility to remove logs older than a specified number of days.
-
-    .PARAMETER Help
-    Show usage help in the command line.
-
-    .PARAMETER Subject
-    The subject line for the e-mail log. Encapsulate with single or double quotes.
-    If no subject is specified, the default of "Log Manager Utility Log" will be used.
-
-    .PARAMETER SendTo
-    The e-mail address the log should be sent to.
-
-    .PARAMETER From
-    The e-mail address the log should be sent from.
-
-    .PARAMETER Smtp
-    The DNS name or IP address of the SMTP server.
-
-    .PARAMETER Port
-    The Port that should be used for the SMTP server.
-
-    .PARAMETER User
-    The user account to authenticate to the SMTP server.
-
-    .PARAMETER Pwd
-    The txt file containing the encrypted password for SMTP authentication.
-
-    .PARAMETER UseSsl
-    Configures the utility to connect to the SMTP server using SSL.
-
-    .EXAMPLE
-    Log-Manager.ps1 -LogsPath C:\inetpub\logs\LogFiles\W3SVC*\* -LogKeep 30 -BackupTo \\nas\archive -BacKeep 30
-    -Wd C:\temp -Compress -L C:\scripts\logs -Subject 'Server: Log Manager' -SendTo me@contoso.com
-    -From Log-Manager@contoso.com -Smtp smtp.outlook.com -User me@contoso.com -Pwd c:\scripts\ps-script-pwd.txt -UseSsl
-
-    The above command will backup and remove IIS logs older than 30 days. It will create a zip folder using the
-    C:\temp folder as a working directory and the file will be stored in \\nas\archive.
-    The log file will be output to C:\scripts\logs and sent via e-mail with a custom subject line.
+    Delete files and folders older than X days, or backup files and folders older than X days to another location and then remove files.
+    Run with -help or no arguments for usage.
 #>
 
 ## Set up command line switches.
@@ -190,27 +100,34 @@ If ($PSBoundParameters.Values.Count -eq 0 -or $Help)
     Write-Host -Object "PLEASE NOTE! This tool can be destructive! Please test it on non critical files first!
 Usage:
     From a terminal run: [path\]Log-Manager.ps1 -LogsPath [path\] -LogKeep [number] -BackupTo [path\]
-    This will backup and remove logs in the path specified older than 30 days.
+    This will backup and remove logs in the path specified older than X days.
 
-    Use the -BacKeep [number] option to specify how long to keep the backups.
+    Use -BacKeep [number] option to specify how long to keep the backups.
     Use -Compress to create a zip file of the logs that are being backed up.
     Use -Sz to use 7-Zip to create a zip instead of Windows compression.
     7-Zip must be installed in the default location, if it is not found, Windows compression will be used.
+
     Use -Wd [path\] to specify a 'working directory' for the creation of the zip file.
     Use -ZipName [name] to name the zip file as you wish - the time and date will be appended to this name.
     If this left blank a default name of logs-HOSTNAME-date-time.zip will be used.
 
-    To output a log: -L [path]. To remove logs produced by the utility older than X days: -LogRotate [number].
+    To output a log: -L [path\].
+    To remove logs produced by the utility older than X days: -LogRotate [number].
     Run with no ASCII banner: -NoBanner
 
     To use the 'email log' function:
     Specify the subject line with -Subject ""'[subject line]'"" If you leave this blank a default subject will be used
     Make sure to encapsulate it with double & single quotes as per the example for Powershell to read it correctly.
+
     Specify the 'to' address with -SendTo [example@contoso.com]
+    For multiple address, separate with a comma.
+
     Specify the 'from' address with -From [example@contoso.com]
     Specify the SMTP server with -Smtp [smtp server name]
+
     Specify the port to use with the SMTP server with -Port [port number].
     If none is specified then the default of 25 will be used.
+
     Specify the user to access SMTP with -User [example@contoso.com]
     Specify the password file to use with -Pwd [path\]ps-script-pwd.txt.
     Use SSL for SMTP server connection with -UseSsl.
