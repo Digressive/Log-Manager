@@ -6,7 +6,7 @@ For full change log and more information, [visit my site.](https://gal.vin/utils
 
 Log Manager Utility is available from:
 
-* [GitHub](https://github.com/Digressive/Email-HTML-Logs)
+* [GitHub](https://github.com/Digressive/Log-Manager)
 * [The Microsoft PowerShell Gallery](https://www.powershellgallery.com/packages/Log-Manager)
 
 Please consider supporting my work:
