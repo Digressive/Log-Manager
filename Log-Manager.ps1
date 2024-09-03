@@ -12,7 +12,7 @@
 
 .TAGS Log Manager Clean up Backup Zip History MDT Microsoft Deployment Toolkit IIS Internet Information Services
 
-.LICENSEURI
+.LICENSEURI https://github.com/Digressive/Log-Manager?tab=MIT-1-ov-file
 
 .PROJECTURI https://gal.vin/utils/log-manager-utility/
 
